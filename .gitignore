@@ -1,0 +1,73 @@
+## Build and Output directories
+[Bb]in/
+[Oo]bj/
+[Oo]ut/
+build/
+dist/
+temp/
+out-tsc/
+
+## Visual Studio
+.vs/
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
+*.userprefs
+
+## Visual Studio Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+## JetBrains Rider
+.idea/
+*.sln.iml
+
+## .NET Core
+project.lock.json
+project.fragment.lock.json
+artifacts/
+*.trx
+*.coverlet.core.xml
+TestResults/
+coverage/
+
+## Environment and Secret files
+.env
+.env.local
+.env.*.local
+*.secrets.json
+appsettings.Development.json.local
+appsettings.Local.json
+
+## Database and Local Data
+*.db
+*.sqlite
+*.sqlite3
+pgdata/
+rabbitmq_data/
+
+## Node / Frontend
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.turbo
+
+## Logs and Temp files
+logs/
+*.log
+*.tmp
+*.bak
+*.swp
+*~
+
+## OS generated files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+[Dd]esktop.ini
