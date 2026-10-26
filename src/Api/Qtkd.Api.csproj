@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.13" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.14">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.3.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Modules\Identity\Qtkd.Modules.Identity.csproj" />
+    <ProjectReference Include="..\Modules\Customers\Qtkd.Modules.Customers.csproj" />
+    <ProjectReference Include="..\Modules\Contracts\Qtkd.Modules.Contracts.csproj" />
+    <ProjectReference Include="..\Modules\Pricing\Qtkd.Modules.Pricing.csproj" />
+    <ProjectReference Include="..\Modules\Production\Qtkd.Modules.Production.csproj" />
+    <ProjectReference Include="..\Modules\Payments\Qtkd.Modules.Payments.csproj" />
+    <ProjectReference Include="..\Modules\Workflow\Qtkd.Modules.Workflow.csproj" />
+    <ProjectReference Include="..\Modules\Audit\Qtkd.Modules.Audit.csproj" />
+    <ProjectReference Include="..\Modules\ESign\Qtkd.Modules.ESign.csproj" />
+    <ProjectReference Include="..\Modules\Notification\Qtkd.Modules.Notification.csproj" />
+    <ProjectReference Include="..\BuildingBlocks\Qtkd.BuildingBlocks.csproj" />
+  </ItemGroup>
+
+</Project>
