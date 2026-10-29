@@ -88,30 +88,87 @@ QTKD_Project/
 
 ---
 
-## 🚀 5. Hướng dẫn Dành cho Lập trình viên
+## 🚀 5. Hướng Dẫn Chạy Cục Bộ Dành Cho Cả 5 Thành Viên (Local Quickstart)
 
-### 5.1. Chuẩn bị môi trường:
-- [.NET 8.0 SDK](https://dotnet.microsoft.com/download) hoặc mới hơn.
-- [Node.js 20+ LTS](https://nodejs.org/) & `pnpm` / `npm`.
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (hoặc Docker Engine trên Linux).
+Tất cả 5 thành viên nhóm (**Hảo, Huy, Hoàng, Hiệu, Dũng**) cần thực hiện các bước sau để thiết lập môi trường và chạy dự án trên máy cá nhân:
+
+### 5.1. Yêu cầu tiên quyết:
+- [.NET 10.0 SDK](https://dotnet.microsoft.com/download) (hoặc .NET 8.0/9.0+ tương thích).
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) đã được cài đặt và đang chạy.
 - [Git](https://git-scm.com/).
 
-### 5.2. Luồng làm việc với Git:
-1. Luôn xuất phát nhánh mới từ `develop`:
+### 5.2. Bước 1: Khởi chạy hạ tầng qua Docker Compose (PostgreSQL, RabbitMQ, pgAdmin)
+Tại thư mục gốc dự án `QTKD_Project`, chạy một trong các lệnh sau:
+
+- **Trên Windows PowerShell**:
+  ```powershell
+  # Cách 1: Sử dụng script tự động
+  .\scripts\run-infra.ps1
+
+  # Cách 2: Dùng lệnh docker compose trực tiếp
+  docker compose up -d
+  # (hoặc docker-compose up -d)
+  ```
+- **Trên macOS / Linux**:
+  ```bash
+  chmod +x ./scripts/*.sh
+  ./scripts/run-infra.sh
+  ```
+
+#### 📌 Thông tin truy cập các dịch vụ hạ tầng:
+| Dịch vụ | Địa chỉ truy cập | Thông tin đăng nhập | Mục đích sử dụng |
+| :--- | :--- | :--- | :--- |
+| **PostgreSQL 16** | `localhost:5432` | User: `postgres`<br>Pass: `postgres`<br>Database: `qtkd_db` | Cơ sở dữ liệu chính, tự động khởi tạo 10 schemas cho các module |
+| **pgAdmin 4 (Web UI)** | [http://localhost:5050](http://localhost:5050) | Email: `admin@qtkd.local`<br>Pass: `admin` | Giao diện đồ họa xem bảng, truy vấn SQL, kiểm tra dữ liệu |
+| **RabbitMQ Management** | [http://localhost:15672](http://localhost:15672) | User: `guest`<br>Pass: `guest` | Bảng điều khiển giám sát Message Queues & Event Bus |
+| **RabbitMQ AMQP** | `localhost:5672` | User: `guest`<br>Pass: `guest` | Cổng kết nối trao đổi sự kiện bất đồng bộ |
+
+> **Khi muốn dừng toàn bộ hạ tầng**: Chạy `.\scripts\stop-infra.ps1` (hoặc `docker compose down`).
+
+---
+
+### 5.3. Bước 2: Chạy kiểm thử tự động (Unit Tests & Integration Tests)
+Kiểm tra tính toàn vẹn của mã nguồn trên máy bạn bằng lệnh:
+```bash
+dotnet test QtkdSolution.sln
+```
+*Kết quả kỳ vọng:* Toàn bộ các bộ kiểm thử `Qtkd.UnitTests` và `Qtkd.IntegrationTests` đều vượt qua 100% (**Passed**).
+
+---
+
+### 5.4. Bước 3: Khởi chạy Backend Web API (.NET Modular Monolith)
+Khởi chạy máy chủ API:
+```bash
+dotnet run --project src/Api/Qtkd.Api.csproj --launch-profile http
+```
+
+Mở trình duyệt truy cập:
+- **Swagger UI (Danh mục API đầy đủ 10 Module)**: [http://localhost:5210/swagger](http://localhost:5210/swagger) (hoặc [http://localhost:5210/](http://localhost:5210/))
+- **Health Check Endpoint**: [http://localhost:5210/health](http://localhost:5210/health) (Trả về `Healthy`)
+- **System Status Endpoint**: [http://localhost:5210/api/v1/system/status](http://localhost:5210/api/v1/system/status)
+
+---
+
+### 5.5. Quy trình làm việc với Git (Dành cho thành viên nhóm)
+1. Cập nhật nhánh `develop` mới nhất:
    ```bash
    git checkout develop
    git pull origin develop
-   git checkout -b feature/<tên-module>-<mô-tả>
    ```
-2. Commit tuân thủ chuẩn **Conventional Commits**:
+2. Tạo nhánh tính năng mới theo quy ước:
    ```bash
-   git commit -m "feat(<module>): <mô tả công việc> [Mã task]"
+   git checkout -b feature/<tên-module>-<mô-tả-ngắn>
    ```
-3. Đẩy nhánh lên GitLab và tạo Merge Request vào nhánh `develop`:
+   *Ví dụ:* `feature/contract-state-machine`, `feature/pricing-exclude-constraint`.
+3. Commit tuân thủ chuẩn **Conventional Commits**:
    ```bash
-   git push -u origin feature/<tên-module>-<mô-tả>
+   git commit -m "feat(<module>): <mô tả ngắn> [Mã task]"
    ```
-4. Đọc chi tiết quy ước tại [CONTRIBUTING.md](./CONTRIBUTING.md).
+4. Đẩy nhánh lên GitLab và tạo **Merge Request** vào nhánh `develop`:
+   ```bash
+   git push -u origin feature/<tên-module>-<mô-tả-ngắn>
+   ```
+5. Đọc chi tiết quy ước tại [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 ---
 
