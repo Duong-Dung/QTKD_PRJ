@@ -31,8 +31,8 @@ if ($LASTEXITCODE -eq 0) {
     Write-Host ""
     Write-Host ">>> HẠ TẦNG ĐÃ SẴN SÀNG! <<<" -ForegroundColor Green
     Write-Host "-----------------------------------------------------------" -ForegroundColor Gray
-    Write-Host "1. PostgreSQL Database:  localhost:5432 (User: postgres, Pass: postgres, DB: qtkd_db)" -ForegroundColor White
-    Write-Host "2. pgAdmin 4 Web UI:     http://localhost:5050 (User: admin@qtkd.local, Pass: admin)" -ForegroundColor White
+    Write-Host "1. PostgreSQL Database:  localhost:5433 (User: postgres, Pass: postgres, DB: qtkd_db)" -ForegroundColor White
+    Write-Host "2. pgAdmin 4 Web UI:     http://localhost:5050 (User: admin@qtkd.com, Pass: admin)" -ForegroundColor White
     Write-Host "3. RabbitMQ Management:  http://localhost:15672 (User: guest, Pass: guest)" -ForegroundColor White
     Write-Host "4. RabbitMQ AMQP Port:   localhost:5672" -ForegroundColor White
     Write-Host "-----------------------------------------------------------" -ForegroundColor Gray

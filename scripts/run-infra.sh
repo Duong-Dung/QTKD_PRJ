@@ -37,3 +37,4 @@ echo "4. RabbitMQ AMQP Port:   localhost:5672"
 echo "-----------------------------------------------------------"
 echo "Chạy API bằng lệnh:"
 echo "  dotnet run --project src/Api/Qtkd.Api.csproj --launch-profile http"
+

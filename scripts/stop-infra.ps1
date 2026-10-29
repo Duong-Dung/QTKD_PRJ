@@ -14,3 +14,4 @@ if (Get-Command "docker-compose" -ErrorAction SilentlyContinue) {
 }
 
 Write-Host "[INFO] Đã dừng toàn bộ các container hạ tầng." -ForegroundColor Green
+

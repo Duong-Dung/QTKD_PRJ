@@ -25,3 +25,4 @@ GRANT ALL ON SCHEMA workflow TO postgres;
 GRANT ALL ON SCHEMA audit TO postgres;
 GRANT ALL ON SCHEMA esign TO postgres;
 GRANT ALL ON SCHEMA notifications TO postgres;
+
