@@ -1,5 +1,23 @@
 services:
-  # 1. PostgreSQL Database Service
+  # 1. Backend Web API Service (.NET Modular Monolith)
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: qtkd_api
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=qtkd_db;Username=postgres;Password=postgres
+    ports:
+      - "${API_HTTP_PORT:-5210}:5210"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - qtkd_network
+
+  # 2. PostgreSQL Database Service
   postgres:
     image: postgres:16-alpine
     container_name: qtkd_postgres
@@ -22,7 +40,7 @@ services:
     networks:
       - qtkd_network
 
-  # 2. RabbitMQ Message Broker with Management Web UI
+  # 3. RabbitMQ Message Broker with Management Web UI
   rabbitmq:
     image: rabbitmq:3.13-management-alpine
     container_name: qtkd_rabbitmq
@@ -44,7 +62,7 @@ services:
     networks:
       - qtkd_network
 
-  # 3. pgAdmin 4 Database Management Web UI
+  # 4. pgAdmin 4 Database Management Web UI
   pgadmin:
     image: dpage/pgadmin4:latest
     container_name: qtkd_pgadmin
