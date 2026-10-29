@@ -118,7 +118,7 @@ Tại thư mục gốc dự án `QTKD_Project`, chạy một trong các lệnh s
 #### 📌 Thông tin truy cập các dịch vụ hạ tầng:
 | Dịch vụ | Địa chỉ truy cập | Thông tin đăng nhập | Mục đích sử dụng |
 | :--- | :--- | :--- | :--- |
-| **PostgreSQL 16** | `localhost:5433` | User: `postgres`<br>Pass: `postgres`<br>Database: `qtkd_db` | Cơ sở dữ liệu chính (cổng 5433 tránh xung đột PostgreSQL local), tự động khởi tạo 10 schemas cho các module |
+| **PostgreSQL 16** | `localhost:5432` | User: `postgres`<br>Pass: `postgres`<br>Database: `qtkd_db` | Cơ sở dữ liệu chính, tự động khởi tạo 10 schemas cho các module |
 | **pgAdmin 4 (Web UI)** | [http://localhost:5050](http://localhost:5050) | Email: `admin@qtkd.com`<br>Pass: `admin` | Giao diện đồ họa xem bảng, truy vấn SQL, kiểm tra dữ liệu |
 | **RabbitMQ Management** | [http://localhost:15672](http://localhost:15672) | User: `guest`<br>Pass: `guest` | Bảng điều khiển giám sát Message Queues & Event Bus |
 | **RabbitMQ AMQP** | `localhost:5672` | User: `guest`<br>Pass: `guest` | Cổng kết nối trao đổi sự kiện bất đồng bộ |
