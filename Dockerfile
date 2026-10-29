@@ -40,3 +40,4 @@ ENV ASPNETCORE_ENVIRONMENT=Development
 
 EXPOSE 5210
 ENTRYPOINT ["dotnet", "Qtkd.Api.dll"]
+
