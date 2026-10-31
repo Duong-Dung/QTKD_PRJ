@@ -22,19 +22,18 @@ fi
 
 echo "[INFO] Đang khởi chạy các service qua docker compose..."
 if command -v docker-compose &> /dev/null; then
-    docker-compose up -d
+    docker-compose up -d postgres rabbitmq pgadmin
 else
-    docker compose up -d
+    docker compose up -d postgres rabbitmq pgadmin
 fi
 
 echo ""
 echo ">>> HẠ TẦNG ĐÃ SẴN SÀNG! <<<"
 echo "-----------------------------------------------------------"
 echo "1. PostgreSQL Database:  localhost:5432 (User: postgres, Pass: postgres, DB: qtkd_db)"
-echo "2. pgAdmin 4 Web UI:     http://localhost:5050 (User: admin@qtkd.local, Pass: admin)"
+echo "2. pgAdmin 4 Web UI:     http://localhost:5050 (User: admin@qtkd.com, Pass: admin)"
 echo "3. RabbitMQ Management:  http://localhost:15672 (User: guest, Pass: guest)"
 echo "4. RabbitMQ AMQP Port:   localhost:5672"
 echo "-----------------------------------------------------------"
 echo "Chạy API bằng lệnh:"
 echo "  dotnet run --project src/Api/Qtkd.Api.csproj --launch-profile http"
-

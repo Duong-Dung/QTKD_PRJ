@@ -93,7 +93,7 @@ QTKD_Project/
 Tất cả 5 thành viên nhóm (**Hảo, Huy, Hoàng, Hiệu, Dũng**) cần thực hiện các bước sau để thiết lập môi trường và chạy dự án trên máy cá nhân:
 
 ### 5.1. Yêu cầu tiên quyết:
-- [.NET 10.0 SDK](https://dotnet.microsoft.com/download) (hoặc .NET 8.0/9.0+ tương thích).
+- [.NET 10.0 SDK](https://dotnet.microsoft.com/download).
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) đã được cài đặt và đang chạy.
 - [Git](https://git-scm.com/).
 
@@ -106,8 +106,8 @@ Tại thư mục gốc dự án `QTKD_Project`, chạy một trong các lệnh s
   .\scripts\run-infra.ps1
 
   # Cách 2: Dùng lệnh docker compose trực tiếp
-  docker compose up -d
-  # (hoặc docker-compose up -d)
+  docker compose up -d postgres rabbitmq pgadmin
+  # (hoặc docker-compose up -d postgres rabbitmq pgadmin)
   ```
 - **Trên macOS / Linux**:
   ```bash
