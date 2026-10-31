@@ -1,3 +1,11 @@
+---
+name: "🐛 Báo cáo lỗi (Bug Report)"
+about: "Thông báo lỗi hoặc sự cố phát sinh trong hệ thống"
+title: "[BUG]: "
+labels: ["bug"]
+assignees: ""
+---
+
 ## 🐛 Mô tả lỗi
 <!-- Mô tả rõ lỗi phát sinh là gì -->
 

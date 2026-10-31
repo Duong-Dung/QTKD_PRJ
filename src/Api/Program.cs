@@ -59,7 +59,7 @@ try
             Contact = new OpenApiContact
             {
                 Name = "HCMUS QTKD Solution Team",
-                Url = new Uri("https://gitlab.com/hcmus-group6213443/qtkd-solution")
+                Url = new Uri("https://github.com/Duong-Dung/QTKD_PRJ")
             }
         });
 

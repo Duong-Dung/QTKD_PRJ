@@ -34,12 +34,12 @@ Dự án sử dụng mô hình Git Flow rút gọn với 2 nhánh chính đượ
 1. **`main`**:
    - Nhánh sản phẩm / release ổn định.
    - **BẮT BUỘC BẬT CHẾ ĐỘ BẢO VỆ (Protected)**: Tuyệt đối không push trực tiếp.
-   - Chỉ được cập nhật thông qua Merge Request từ `develop` khi release phiên bản (ví dụ v1.0).
+   - Chỉ được cập nhật thông qua Pull Request từ `develop` khi release phiên bản (ví dụ v1.0).
 
 2. **`develop`**:
    - Nhánh tích hợp chính của nhóm.
    - **BẮT BUỘC BẬT CHẾ ĐỘ BẢO VỆ (Protected)**: Không cho phép push trực tiếp.
-   - Tất cả các tính năng hoàn thành đều phải mở Merge Request vào nhánh này.
+   - Tất cả các tính năng hoàn thành đều phải mở Pull Request vào nhánh này.
 
 ### Cấu trúc đặt tên nhánh tính năng / sửa lỗi:
 
@@ -91,7 +91,7 @@ Toàn bộ thành viên **bắt buộc tuân thủ chuẩn Conventional Commits*
 - `refactor`: Tái cấu trúc code (không đổi hành vi bên ngoài và không sửa bug).
 - `test`: Thêm mới hoặc chỉnh sửa unit test, integration test.
 - `chore`: Cập nhật cấu hình build, package dependencies, gitignore, tác vụ phụ trợ.
-- `ci`: Cập nhật cấu hình CI/CD (`.gitlab-ci.yml`, Dockerfile).
+- `ci`: Cập nhật cấu hình CI/CD (`.github/workflows/`, Dockerfile).
 - `perf`: Tối ưu hiệu năng, đánh index CSDL, truy vấn SQL.
 
 ### Ví dụ chuẩn:
@@ -106,24 +106,24 @@ git commit -m "chore(infra): add docker-compose with postgres, rabbitmq and pgad
 
 ---
 
-## 4. Quy trình Mở & Duyệt Merge Request (MR Workflow)
+## 4. Quy trình Mở & Duyệt Pull Request (PR Workflow)
 
-1. **Chuẩn bị trước khi mở MR**:
+1. **Chuẩn bị trước khi mở PR**:
    - Chạy `git checkout develop && git pull origin develop`
    - Rebase hoặc merge nhánh `develop` mới nhất vào nhánh của mình: `git merge develop`
-   - Chạy test local: Đảm bảo code build thành công và tất cả unit test đều xanh.
-2. **Mở Merge Request trên GitLab**:
-   - **Target branch**: Luôn là `develop` (không chọn `main`).
-   - Chọn template: **Default** (đã được cấu hình tự động).
+   - Chạy test local: Đảm bảo code build thành công và tất cả unit test đều xanh (`dotnet test QtkdSolution.sln`).
+2. **Mở Pull Request trên GitHub**:
+   - **Base branch**: Luôn là `develop` (không chọn `main`).
+   - GitHub sẽ tự động điền template Pull Request (`.github/pull_request_template.md`).
    - Điền đầy đủ mô tả, liên kết issue (`Closes #ID`).
    - Tích chọn đầy đủ checklist trong Definition of Done.
 3. **Review chéo (Peer Review)**:
    - Gán ít nhất 1 thành viên khác trong nhóm làm **Reviewer** (hoặc gán Huy/Dũng/Hảo).
    - Reviewer phải kiểm tra diff code, kiểm tra logic nghiệp vụ và các rule (CTR, PRC, PAY, APR).
-   - Nếu có nhận xét, tác giả sửa trên nhánh feature và push lên, MR sẽ tự cập nhật.
+   - Nếu có nhận xét, tác giả sửa trên nhánh feature và push lên, PR sẽ tự cập nhật.
 4. **Merge vào `develop`**:
-   - Khi được chấp thuận (Approved) và pipeline CI báo xanh (sau khi T015 hoàn tất).
-   - Chọn tùy chọn **Delete source branch** sau khi merge để giữ repo sạch sẽ.
+   - Khi được chấp thuận (Approved) và GitHub Actions CI pipeline báo xanh.
+   - Chọn tùy chọn **Delete branch** sau khi merge để giữ repo sạch sẽ.
 
 ---
 

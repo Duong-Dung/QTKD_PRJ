@@ -23,11 +23,11 @@ Dự án gồm **5 thành viên**, đảm nhiệm các module và vai trò chuy�
 
 | STT | Thành viên | Vai trò chính | Module / Trách nhiệm chính |
 | :---: | :--- | :--- | :--- |
-| 1 | **Hảo** | Quản lý dự án, UI/UX & Frontend Lead | Quản lý tiến độ GitLab, thiết kế Figma Style Guide/Prototype, xây dựng nền tảng giao diện React và các màn hình chính (Khách hàng, Hợp đồng, Phê duyệt, Bảng giá, Thanh toán). |
+| 1 | **Hảo** | Quản lý dự án, UI/UX & Frontend Lead | Quản lý tiến độ GitHub Projects/Issues, thiết kế Figma Style Guide/Prototype, xây dựng nền tảng giao diện React và các màn hình chính (Khách hàng, Hợp đồng, Phê duyệt, Bảng giá, Thanh toán). |
 | 2 | **Huy** | Technical Architect & Workflow Specialist | Thiết kế và lập trình Workflow Engine data-driven, xử lý chống double-submit và race condition khi duyệt, tối ưu optimistic locking và review chéo kiến trúc. |
 | 3 | **Hoàng** | Business Logic Lead (Hợp đồng & Nghiệp vụ) | Thiết kế và cài đặt module Khách hàng, Hợp đồng, Phụ lục hợp đồng; Contract State Machine (CTR-01..07); kiểm thử tích hợp và E2E. |
 | 4 | **Hiệu** | Database & Financial Calculation Specialist | Thiết kế ERD chuẩn, quy ước CSDL, migration PostgreSQL; lập trình module Bảng giá (versioning, daterange), Sản lượng khai thác và Bộ tính bảng thanh toán (Payment Calculator). |
-| 5 | **Dũng** | DevOps, Platform & Infrastructure Lead | Khởi tạo repo GitLab, thiết lập hạ tầng Docker Compose (PostgreSQL, RabbitMQ), dựng khung Solution .NET Modular Monolith, CI/CD pipeline, module Identity (JWT/RBAC), Outbox Pattern, Notification, Audit Log và E-Sign Service mô phỏng. |
+| 5 | **Dũng** | DevOps, Platform & Infrastructure Lead | Khởi tạo repo GitHub, thiết lập hạ tầng Docker Compose (PostgreSQL, RabbitMQ), dựng khung Solution .NET Modular Monolith, GitHub Actions CI/CD pipeline, module Identity (JWT/RBAC), Outbox Pattern, Notification, Audit Log và E-Sign Service mô phỏng. |
 
 ---
 
@@ -44,7 +44,7 @@ Hệ thống được tổ chức theo mô hình **Modular Monolith** kết hợ
 - **Event Bus / Message Broker**: RabbitMQ
 - **Object Storage / Attachments**: Local Volume / MinIO
 - **Frontend**: React 18 / 19 + TypeScript + Vite + Tailwind CSS / Vanilla CSS
-- **Containerization & CI**: Docker, Docker Compose, GitLab CI/CD
+- **Containerization & CI**: Docker, Docker Compose, GitHub Actions CI/CD
 - **Testing**: xUnit, FluentAssertions, Moq, Testcontainers
 - **Tài liệu & Thiết kế**: Swagger/OpenAPI, PlantUML, Draw.io, Figma
 
@@ -54,9 +54,10 @@ Hệ thống được tổ chức theo mô hình **Modular Monolith** kết hợ
 
 ```text
 QTKD_Project/
-├── .gitlab/                             # GitLab config & templates
-│   ├── issue_templates/                 # Template Issue cho Feature/Bug
-│   └── merge_request_templates/         # Template MR có checklist DoD
+├── .github/                             # GitHub config & workflows
+│   ├── ISSUE_TEMPLATE/                  # Template Issue cho Feature/Bug
+│   ├── workflows/ci.yml                 # Pipeline GitHub Actions CI tự động build & test
+│   └── pull_request_template.md         # Template PR có checklist DoD
 ├── docs/                                # Tài liệu kỹ thuật dự án
 │   ├── design/                          # Quyết định kiến trúc (concurrency, addendum, payment)
 │   ├── uml/                             # Sơ đồ Use case, Class, Sequence diagrams
@@ -80,7 +81,6 @@ QTKD_Project/
 │   ├── UnitTests/                       # Kiểm thử đơn vị các domain rule & calculator
 │   └── IntegrationTests/                # Kiểm thử tích hợp với Testcontainers
 ├── docker-compose.yml                   # Khởi chạy PostgreSQL, RabbitMQ, pgAdmin
-├── .gitlab-ci.yml                       # Pipeline CI tự động build & test
 ├── CONTRIBUTING.md                      # Quy ước nhánh, commit & quy trình review
 ├── README.md                            # Giới thiệu tổng quan & hướng dẫn
 └── .gitignore                           # Cấu hình bỏ qua file rác / build output
@@ -164,7 +164,7 @@ Mở trình duyệt truy cập:
    ```bash
    git commit -m "feat(<module>): <mô tả ngắn> [Mã task]"
    ```
-4. Đẩy nhánh lên GitLab và tạo **Merge Request** vào nhánh `develop`:
+4. Đẩy nhánh lên GitHub và tạo **Pull Request** vào nhánh `develop`:
    ```bash
    git push -u origin feature/<tên-module>-<mô-tả-ngắn>
    ```
@@ -174,4 +174,4 @@ Mở trình duyệt truy cập:
 
 ## 📜 6. Giấy phép & Thông tin Đồ án
 - Đồ án phục vụ mục đích học tập môn **Phát Triển Ứng Dụng Hệ Thống Thông Tin Hiện Đại** - Khoa CNTT, Trường ĐH KHTN TP.HCM.
-- GitLab Repository: [HCMUS-group / qtkd-solution](https://gitlab.com/hcmus-group6213443/qtkd-solution)
+- GitHub Repository: [Duong-Dung / QTKD_PRJ](https://github.com/Duong-Dung/QTKD_PRJ)

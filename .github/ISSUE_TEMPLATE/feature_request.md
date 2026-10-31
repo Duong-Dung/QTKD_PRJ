@@ -1,3 +1,11 @@
+---
+name: "✨ Tính năng mới (Feature Request)"
+about: "Đề xuất tính năng mới hoặc nhiệm vụ nghiệp vụ (Task)"
+title: "[FEAT]: "
+labels: ["enhancement"]
+assignees: ""
+---
+
 ## 🎯 Mục tiêu / Yêu cầu
 <!-- Mô tả ngắn gọn tính năng hoặc yêu cầu nghiệp vụ cần thực hiện -->
 
@@ -13,7 +21,7 @@
 ## 🏁 Tiêu chuẩn hoàn thành (Definition of Done)
 - [ ] Code build & test pass.
 - [ ] Đáp ứng đầy đủ quy tắc nghiệp vụ liên quan (CTR, PRC, PAY, APR,...).
-- [ ] Đã tạo Merge Request theo đúng template.
+- [ ] Đã tạo Pull Request theo đúng template.
 - [ ] Có tài liệu/unit test đi kèm.
 
 ## 👥 Phân công

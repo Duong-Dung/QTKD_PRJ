@@ -1,9 +1,9 @@
 ## 📌 Tóm tắt thay đổi (Summary)
-<!-- Tóm tắt ngắn gọn mục đích và nội dung của Merge Request này (1-3 câu) -->
+<!-- Tóm tắt ngắn gọn mục đích và nội dung của Pull Request này (1-3 câu) -->
 - 
 
 ## 🎯 Issue liên quan
-<!-- Ghi rõ mã Issue để GitLab tự động đóng khi merge -->
+<!-- Ghi rõ mã Issue để GitHub tự động đóng khi merge -->
 Closes #
 Ref #
 
@@ -27,7 +27,7 @@ Ref #
 
 - [ ] **Build & Compile**: Code build thành công ở máy local (`dotnet build` / `npm run build`), không có warning/error nghiêm trọng.
 - [ ] **Kiểm thử (Tests)**:
-  - [ ] Đã chạy toàn bộ unit/integration test cục bộ và tất cả đều **PASS**.
+  - [ ] Đã chạy toàn bộ unit/integration test cục bộ và tất cả đều **PASS** (`dotnet test QtkdSolution.sln`).
   - [ ] Đã bổ sung/cập nhật unit test hoặc integration test cho logic mới (nếu có).
 - [ ] **Tự rà soát (Self-Review)**:
   - [ ] Đã tự review lại toàn bộ diff thay đổi của mình trên Git.
