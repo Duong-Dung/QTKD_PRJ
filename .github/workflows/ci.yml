@@ -45,3 +45,4 @@ jobs:
           name: test-results
           path: "**/TestResults/*.trx"
           retention-days: 7
+
