@@ -61,7 +61,8 @@ QTKD_Project/
 ├── docs/                                # Tài liệu kỹ thuật dự án
 │   ├── design/                          # Quyết định kiến trúc (concurrency, addendum, payment)
 │   ├── uml/                             # Sơ đồ Use case, Class, Sequence diagrams
-│   └── db-conventions.md                # Quy ước thiết kế CSDL
+│   ├── db-conventions.md                # Quy ước thiết kế CSDL
+│   └── sprint1-db-migration-guide.md    # Hướng dẫn CSDL & Migration Sprint 1 (TASK-13)
 ├── src/                                 # Mã nguồn chính
 │   ├── Api/                             # Web API Host (chứa Entrypoint, Swagger, Middleware)
 │   ├── BuildingBlocks/                  # Thư viện dùng chung (Outbox, MediatR, EventBus, Common)

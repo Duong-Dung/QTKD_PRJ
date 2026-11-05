@@ -4,59 +4,75 @@ namespace Qtkd.Modules.Contracts.Entities;
 
 public enum ContractStatus
 {
-    Draft = 1,
-    Submitted = 2,
-    UnderReview = 3,
-    Approved = 4,
-    RevisionRequested = 5,
-    Rejected = 6,
-    Active = 7,
-    Expired = 8,
-    Cancelled = 9
+    Draft,
+    Submitted,
+    UnderReview,
+    Approved,
+    Active,
+    Expired,
+    Rejected,
+    RevisionRequested,
+    Cancelled
 }
 
-public class Contract : BaseEntity, IAuditable
+public enum AddendumChangeType
 {
-    public string ContractNumber { get; set; } = string.Empty;
+    PriceChange,
+    ExtendTerm,
+    PaymentTerms,
+    AddService
+}
+
+public class Contract : AuditableEntity
+{
+    public string Code { get; set; } = string.Empty;
     public Guid CustomerId { get; set; }
-    public string CustomerCode { get; set; } = string.Empty;
-    public DateTimeOffset StartDate { get; set; }
-    public DateTimeOffset EndDate { get; set; }
-    public decimal Value { get; set; }
-    public string PaymentTerms { get; set; } = string.Empty;
-    public string ServiceTerms { get; set; } = string.Empty;
+    public string Title { get; set; } = string.Empty;
+    public DateOnly EffectiveFrom { get; set; }
+    public DateOnly EffectiveTo { get; set; }
+    public decimal ContractValue { get; set; }
+    public string Currency { get; set; } = "VND";
+    public string? PaymentTerms { get; set; }
+    public string? ServiceTerms { get; set; }
     public ContractStatus Status { get; set; } = ContractStatus.Draft;
+    public Guid OwnerUserId { get; set; }
+    public Guid? RevisionOfContractId { get; set; }
+    public string? CancelledReason { get; set; }
+    public DateTimeOffset? CancelledAt { get; set; }
 
-    public string? CreatedBy { get; set; }
-    public string? UpdatedBy { get; set; }
-
+    public Contract? RevisionOfContract { get; set; }
+    public ICollection<Contract> Revisions { get; set; } = new List<Contract>();
     public ICollection<ContractAttachment> Attachments { get; set; } = new List<ContractAttachment>();
-    public ICollection<ContractAddendum> Addendums { get; set; } = new List<ContractAddendum>();
+    public ICollection<ContractAddendum> Addenda { get; set; } = new List<ContractAddendum>();
 }
 
-public class ContractAttachment : BaseEntity
+public class ContractAttachment : AuditableEntity
 {
     public Guid ContractId { get; set; }
-    public Contract? Contract { get; set; }
-
+    public Guid? AddendumId { get; set; }
     public string FileName { get; set; } = string.Empty;
-    public long FileSizeBytes { get; set; }
     public string ContentType { get; set; } = string.Empty;
+    public long SizeBytes { get; set; }
     public string StoragePath { get; set; } = string.Empty;
+    public string? Checksum { get; set; }
+    public bool IsMainDocument { get; set; }
+
+    public Contract? Contract { get; set; }
+    public ContractAddendum? Addendum { get; set; }
 }
 
-public class ContractAddendum : BaseEntity, IAuditable
+public class ContractAddendum : AuditableEntity
 {
+    public string Code { get; set; } = string.Empty;
     public Guid ContractId { get; set; }
-    public Contract? Contract { get; set; }
-
-    public string AddendumNumber { get; set; } = string.Empty;
-    public string ChangeType { get; set; } = string.Empty; // Đơn giá, Thời hạn, Điều khoản thanh toán, Dịch vụ
-    public decimal? NewValue { get; set; }
-    public DateTimeOffset EffectiveDate { get; set; }
-    public string Description { get; set; } = string.Empty;
+    public Guid OwnerUserId { get; set; }
+    public AddendumChangeType ChangeType { get; set; }
+    public string? Description { get; set; }
+    public DateOnly EffectiveFrom { get; set; }
+    public DateOnly? NewEffectiveTo { get; set; }
+    public string? NewPaymentTerms { get; set; }
     public ContractStatus Status { get; set; } = ContractStatus.Draft;
 
-    public string? CreatedBy { get; set; }
-    public string? UpdatedBy { get; set; }
+    public Contract? Contract { get; set; }
+    public ICollection<ContractAttachment> Attachments { get; set; } = new List<ContractAttachment>();
 }
