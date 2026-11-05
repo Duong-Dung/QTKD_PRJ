@@ -90,3 +90,4 @@ public class JwtTokenService : IJwtTokenService
         return Convert.ToHexString(bytes).ToLowerInvariant();
     }
 }
+

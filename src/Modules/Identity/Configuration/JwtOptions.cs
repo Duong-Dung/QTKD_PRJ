@@ -10,3 +10,4 @@ public class JwtOptions
     public int ExpiryMinutes { get; set; } = 120;
     public int RefreshTokenExpiryDays { get; set; } = 7;
 }
+

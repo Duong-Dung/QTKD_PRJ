@@ -136,3 +136,4 @@ public class IdentityIntegrationTests : IClassFixture<QtkdWebApplicationFactory>
         Assert.Contains("/api/v1/identity/me", content);
     }
 }
+

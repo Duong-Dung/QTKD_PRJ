@@ -12,3 +12,4 @@ public static class RoleConstants
     public const string RequireManager = "RequireManager";
     public const string RequireStaff = "RequireStaff";
 }
+
