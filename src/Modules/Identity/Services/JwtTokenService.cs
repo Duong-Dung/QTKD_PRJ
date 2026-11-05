@@ -86,6 +86,11 @@ public class JwtTokenService : IJwtTokenService
 
     public string HashRefreshToken(string token)
     {
+        if (string.IsNullOrWhiteSpace(token))
+        {
+            return string.Empty;
+        }
+
         var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(token));
         return Convert.ToHexString(bytes).ToLowerInvariant();
     }

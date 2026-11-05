@@ -37,6 +37,11 @@ public class AuthService : IAuthService
 
     public async Task<LoginResponse> LoginAsync(LoginRequest request, CancellationToken ct = default)
     {
+        if (request == null || string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
+        {
+            throw new UnauthorizedException("Tên đăng nhập và mật khẩu không được để trống.");
+        }
+
         var inputIdentifier = request.Username.Trim().ToLowerInvariant();
 
         var user = await _context.Users
@@ -112,6 +117,11 @@ public class AuthService : IAuthService
 
     public async Task<LoginResponse> RefreshTokenAsync(RefreshTokenRequest request, CancellationToken ct = default)
     {
+        if (request == null || string.IsNullOrWhiteSpace(request.RefreshToken))
+        {
+            throw new UnauthorizedException("Refresh token không được để trống.");
+        }
+
         var tokenHash = _jwtTokenService.HashRefreshToken(request.RefreshToken.Trim());
 
         var tokenRecord = await _context.RefreshTokens
@@ -179,6 +189,11 @@ public class AuthService : IAuthService
 
     public async Task<UserDto> GetCurrentUserAsync(Guid userId, CancellationToken ct = default)
     {
+        if (userId == Guid.Empty)
+        {
+            throw new UnauthorizedException("Mã định danh người dùng không hợp lệ.");
+        }
+
         var user = await _context.Users
             .Include(u => u.Department)
             .Include(u => u.UserRoles)

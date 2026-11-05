@@ -285,4 +285,42 @@ public class IdentityAuthUnitTests
         var activeTokens = await context.RefreshTokens.Where(rt => rt.UserId == user.Id && rt.RevokedAt == null).ToListAsync();
         Assert.Single(activeTokens);
     }
+
+    [Fact]
+    public async Task AuthService_Login_WithNullOrEmptyCredentials_ShouldThrowUnauthorized()
+    {
+        // Arrange
+        using var context = CreateInMemoryContext();
+        var authService = new AuthService(context, _passwordHasher, _jwtTokenService, NullLogger<AuthService>.Instance);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<UnauthorizedException>(() =>
+            authService.LoginAsync(new LoginRequest { Username = "", Password = "" }));
+        await Assert.ThrowsAsync<UnauthorizedException>(() =>
+            authService.LoginAsync(new LoginRequest { Username = "user", Password = "   " }));
+    }
+
+    [Fact]
+    public async Task AuthService_RefreshToken_WithEmptyToken_ShouldThrowUnauthorized()
+    {
+        // Arrange
+        using var context = CreateInMemoryContext();
+        var authService = new AuthService(context, _passwordHasher, _jwtTokenService, NullLogger<AuthService>.Instance);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<UnauthorizedException>(() =>
+            authService.RefreshTokenAsync(new RefreshTokenRequest { RefreshToken = "" }));
+    }
+
+    [Fact]
+    public async Task AuthService_GetCurrentUser_WithEmptyGuid_ShouldThrowUnauthorized()
+    {
+        // Arrange
+        using var context = CreateInMemoryContext();
+        var authService = new AuthService(context, _passwordHasher, _jwtTokenService, NullLogger<AuthService>.Instance);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<UnauthorizedException>(() =>
+            authService.GetCurrentUserAsync(Guid.Empty));
+    }
 }
