@@ -22,9 +22,9 @@ try {
 # Khởi chạy các container nền
 Write-Host "[INFO] Đang khởi chạy các service nền qua docker-compose..." -ForegroundColor Yellow
 if (Get-Command "docker-compose" -ErrorAction SilentlyContinue) {
-    docker-compose up -d
+    docker-compose up -d postgres rabbitmq pgadmin
 } else {
-    docker compose up -d
+    docker compose up -d postgres rabbitmq pgadmin
 }
 
 if ($LASTEXITCODE -eq 0) {
