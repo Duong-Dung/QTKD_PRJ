@@ -4,21 +4,22 @@ namespace Qtkd.Modules.Customers.Entities;
 
 public enum CustomerStatus
 {
-    Active = 1,
-    Suspended = 2
+    Active,
+    Suspended
 }
 
-public class Customer : BaseEntity, IAuditable
+public class Customer : AuditableEntity
 {
     public string Code { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public string TaxCode { get; set; } = string.Empty;
     public string Address { get; set; } = string.Empty;
-    public string Representative { get; set; } = string.Empty;
-    public string ContactPhone { get; set; } = string.Empty;
-    public string ContactEmail { get; set; } = string.Empty;
+    public string RepresentativeName { get; set; } = string.Empty;
+    public string? RepresentativeTitle { get; set; }
+    public string? ContactPerson { get; set; }
+    public string? ContactPhone { get; set; }
+    public string? ContactEmail { get; set; }
     public CustomerStatus Status { get; set; } = CustomerStatus.Active;
-
-    public string? CreatedBy { get; set; }
-    public string? UpdatedBy { get; set; }
+    public string? SuspendedReason { get; set; }
+    public DateTimeOffset? SuspendedAt { get; set; }
 }

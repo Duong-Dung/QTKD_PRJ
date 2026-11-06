@@ -11,7 +11,7 @@ public enum EsignSessionStatus
     Cancelled = 5
 }
 
-public class EsignSession : BaseEntity, IAuditable
+public class EsignSession : AuditableEntity
 {
     public Guid DocumentId { get; set; } // Reference to PaymentStatement or Contract
     public string DocumentType { get; set; } = "PaymentStatement";
@@ -23,6 +23,4 @@ public class EsignSession : BaseEntity, IAuditable
     public DateTimeOffset? SignedAt { get; set; }
     public string? FailureReason { get; set; }
 
-    public string? CreatedBy { get; set; }
-    public string? UpdatedBy { get; set; }
 }
