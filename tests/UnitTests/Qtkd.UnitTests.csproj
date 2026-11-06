@@ -20,7 +20,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\BuildingBlocks\Qtkd.BuildingBlocks.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Identity\Qtkd.Modules.Identity.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Customers\Qtkd.Modules.Customers.csproj" />
     <ProjectReference Include="..\..\src\Modules\Contracts\Qtkd.Modules.Contracts.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Workflow\Qtkd.Modules.Workflow.csproj" />
     <ProjectReference Include="..\..\src\Modules\Payments\Qtkd.Modules.Payments.csproj" />
     <ProjectReference Include="..\..\src\Modules\Pricing\Qtkd.Modules.Pricing.csproj" />
   </ItemGroup>

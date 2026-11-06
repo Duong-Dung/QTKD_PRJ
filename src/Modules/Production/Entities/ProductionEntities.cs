@@ -2,7 +2,7 @@ using Qtkd.BuildingBlocks.Common;
 
 namespace Qtkd.Modules.Production.Entities;
 
-public class ProductionPeriod : BaseEntity, IAuditable
+public class ProductionPeriod : AuditableEntity
 {
     public string PeriodCode { get; set; } = string.Empty; // Ví dụ: 2026-10
     public string Name { get; set; } = string.Empty;
@@ -12,13 +12,10 @@ public class ProductionPeriod : BaseEntity, IAuditable
     public DateTimeOffset? LockedAt { get; set; }
     public string? LockedBy { get; set; }
 
-    public string? CreatedBy { get; set; }
-    public string? UpdatedBy { get; set; }
-
     public ICollection<ProductionRecord> Records { get; set; } = new List<ProductionRecord>();
 }
 
-public class ProductionRecord : BaseEntity, IAuditable
+public class ProductionRecord : AuditableEntity
 {
     public Guid PeriodId { get; set; }
     public ProductionPeriod? Period { get; set; }
@@ -37,6 +34,4 @@ public class ProductionRecord : BaseEntity, IAuditable
     public bool IsReconciled { get; set; } = false;
     public Guid? ReconciledPaymentId { get; set; }
 
-    public string? CreatedBy { get; set; }
-    public string? UpdatedBy { get; set; }
 }

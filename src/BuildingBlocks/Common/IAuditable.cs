@@ -1,10 +1,10 @@
 namespace Qtkd.BuildingBlocks.Common;
 
 /// <summary>
-/// Giao diện đánh dấu entity cần truy vết người tạo và người chỉnh sửa cuối.
+/// Người tạo / người sửa cuối. Không có khóa ngoại tới users (job hệ thống ghi null).
 /// </summary>
 public interface IAuditable
 {
-    string? CreatedBy { get; set; }
-    string? UpdatedBy { get; set; }
+    Guid? CreatedBy { get; set; }
+    Guid? UpdatedBy { get; set; }
 }

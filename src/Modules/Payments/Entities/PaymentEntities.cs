@@ -17,7 +17,7 @@ public enum PaymentStatementStatus
     Cancelled = 11
 }
 
-public class PaymentStatement : BaseEntity, IAuditable
+public class PaymentStatement : AuditableEntity
 {
     public string StatementNumber { get; set; } = string.Empty;
     public Guid ContractId { get; set; }
@@ -35,9 +35,6 @@ public class PaymentStatement : BaseEntity, IAuditable
     /// </summary>
     public bool IsAdjustment { get; set; } = false;
     public Guid? OriginalStatementId { get; set; }
-
-    public string? CreatedBy { get; set; }
-    public string? UpdatedBy { get; set; }
 
     public ICollection<PaymentLine> Lines { get; set; } = new List<PaymentLine>();
 }
