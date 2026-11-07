@@ -13,7 +13,7 @@ public enum PriceListStatus
     Expired = 7
 }
 
-public class PriceList : BaseEntity, IAuditable
+public class PriceList : AuditableEntity
 {
     public string Code { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
@@ -29,9 +29,6 @@ public class PriceList : BaseEntity, IAuditable
     /// Đánh dấu bảng giá đã được dùng để tính thanh toán (PRC-05: không cho sửa, phải sinh version mới)
     /// </summary>
     public bool IsUsed { get; set; } = false;
-
-    public string? CreatedBy { get; set; }
-    public string? UpdatedBy { get; set; }
 
     public ICollection<PriceItem> Items { get; set; } = new List<PriceItem>();
 }

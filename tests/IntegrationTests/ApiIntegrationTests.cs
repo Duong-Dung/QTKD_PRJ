@@ -1,14 +1,12 @@
 using System.Net;
-using Microsoft.AspNetCore.Mvc.Testing;
-using Xunit;
 
 namespace Qtkd.IntegrationTests;
 
-public class ApiIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
+public class ApiIntegrationTests : IClassFixture<QtkdWebApplicationFactory>
 {
     private readonly HttpClient _client;
 
-    public ApiIntegrationTests(WebApplicationFactory<Program> factory)
+    public ApiIntegrationTests(QtkdWebApplicationFactory factory)
     {
         _client = factory.CreateClient();
     }

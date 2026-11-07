@@ -4,8 +4,7 @@ using Qtkd.BuildingBlocks.Common;
 namespace Qtkd.BuildingBlocks.Persistence;
 
 /// <summary>
-/// Lớp cơ sở DbContext dùng chung cho các Module trong hệ thống Modular Monolith.
-/// Tự động cập nhật CreatedAt, UpdatedAt và cấu hình xmin làm Concurrency Token trên PostgreSQL.
+/// DbContext cơ sở: UTC timestamps và xmin làm concurrency token.
 /// </summary>
 public abstract class ModuleDbContext : DbContext
 {
@@ -17,24 +16,36 @@ public abstract class ModuleDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
-        // Tự động cấu hình xmin làm Concurrency Token cho mọi thực thể kế thừa BaseEntity
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
-            if (typeof(BaseEntity).IsAssignableFrom(entityType.ClrType))
+            if (!typeof(BaseEntity).IsAssignableFrom(entityType.ClrType))
             {
-                modelBuilder.Entity(entityType.ClrType)
-                    .Property<uint>(nameof(BaseEntity.RowVersion))
-                    .IsRowVersion();
+                continue;
             }
+
+            modelBuilder.Entity(entityType.ClrType)
+                .Property<uint>(nameof(BaseEntity.RowVersion))
+                .IsRowVersion();
         }
     }
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        var entries = ChangeTracker.Entries<BaseEntity>();
+        ApplyAuditTimestamps();
+        return base.SaveChangesAsync(cancellationToken);
+    }
+
+    public override int SaveChanges()
+    {
+        ApplyAuditTimestamps();
+        return base.SaveChanges();
+    }
+
+    private void ApplyAuditTimestamps()
+    {
         var now = DateTimeOffset.UtcNow;
 
-        foreach (var entry in entries)
+        foreach (var entry in ChangeTracker.Entries<BaseEntity>())
         {
             if (entry.State == EntityState.Added)
             {
@@ -45,7 +56,5 @@ public abstract class ModuleDbContext : DbContext
                 entry.Entity.UpdatedAt = now;
             }
         }
-
-        return base.SaveChangesAsync(cancellationToken);
     }
 }

@@ -1,5 +1,6 @@
 using Microsoft.OpenApi;
 using Serilog;
+using Qtkd.Api.Extensions;
 using Qtkd.BuildingBlocks.Middleware;
 using Qtkd.Modules.Identity.Extensions;
 using Qtkd.Modules.Customers.Extensions;
@@ -82,7 +83,8 @@ try
         });
     });
 
-    // 7. Đăng ký các Module độc lập (Modular Monolith)
+    // 7. DbContext thống nhất Sprint 1 + các Module độc lập
+    builder.Services.AddQtkdPersistence(builder.Configuration);
     builder.Services.AddIdentityModule(builder.Configuration);
     builder.Services.AddCustomersModule(builder.Configuration);
     builder.Services.AddContractsModule(builder.Configuration);
@@ -95,6 +97,8 @@ try
     builder.Services.AddNotificationModule(builder.Configuration);
 
     var app = builder.Build();
+
+    app.ApplyQtkdMigrations();
 
     // 8. Pipeline xử lý HTTP Requests
     app.UseSerilogRequestLogging();

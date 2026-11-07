@@ -14,9 +14,9 @@ public class DomainTests
         // Act
         var contract = new Contract
         {
-            ContractNumber = "HD-2026-001",
-            CustomerCode = "KH-001",
-            Value = 150_000_000m
+            Code = "HD-2026-001",
+            Title = "Hợp đồng dịch vụ cảng",
+            ContractValue = 150_000_000m
         };
 
         // Assert
