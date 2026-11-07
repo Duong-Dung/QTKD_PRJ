@@ -1,0 +1,767 @@
+{
+  "info": {
+    "_postman_id": "c1f7a4d5-82b3-4f9e-9d8a-7e3f2a1b9c0d",
+    "name": "QTKD Logistics - Sprint 01 (Identity & RBAC)",
+    "description": "Bộ API kiểm thử hoàn chỉnh cho Sprint 01 dự án QTKD Logistics:\n- Health & System Status\n- Authentication (Login, Refresh Token rotation, /me)\n- RBAC Policies (Admin, Director, Manager, Staff, 403 Forbidden, 401 Unauthorized)\n- User & Role Query APIs\n\nTất cả requests đã được cài sẵn Test Scripts tự động trích xuất và lưu Bearer Token vào Collection Variables.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5210",
+      "type": "string"
+    },
+    {
+      "key": "admin_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "admin_refresh_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "director_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "manager_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "staff_token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "00 - System & Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test(\"Health status is Healthy\", function () {",
+                  "    pm.expect(pm.response.text()).to.include(\"Healthy\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            },
+            "description": "Kiểm tra tình trạng sức khỏe tổng quan của hệ thống Web API."
+          },
+          "response": []
+        },
+        {
+          "name": "System Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Environment is Development\", function () {",
+                  "    pm.expect(json.environment).to.eql(\"Development\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/system/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "system", "status"]
+            },
+            "description": "Kiểm tra trạng thái hệ thống, môi trường và version."
+          },
+          "response": []
+        },
+        {
+          "name": "Identity Module Info",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var json = pm.response.json();",
+                  "pm.test(\"Module name is Identity\", function () {",
+                  "    pm.expect(json.module).to.eql(\"Identity\");",
+                  "    pm.expect(json.status).to.eql(\"Online\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/identity/info",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "identity", "info"]
+            },
+            "description": "Kiểm tra module Identity & Access Management đã sẵn sàng."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "01 - Authentication (TASK-18)",
+      "item": [
+        {
+          "name": "1. Login Admin (Auto Token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var res = pm.response.json();",
+                  "pm.test(\"Login success with Admin role\", function () {",
+                  "    pm.expect(res.isSuccess).to.be.true;",
+                  "    pm.expect(res.data.token).to.be.a('string');",
+                  "    pm.expect(res.data.roles).to.include('ADMIN');",
+                  "});",
+                  "if (res.data && res.data.token) {",
+                  "    pm.collectionVariables.set(\"admin_token\", res.data.token);",
+                  "    pm.collectionVariables.set(\"admin_refresh_token\", res.data.refreshToken);",
+                  "    console.log(\"[SUCCESS] Saved admin_token & admin_refresh_token!\");",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"Password123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/identity/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "identity", "login"]
+            },
+            "description": "Đăng nhập tài khoản Admin hệ thống (tự động lưu admin_token và admin_refresh_token)."
+          },
+          "response": []
+        },
+        {
+          "name": "2. Login Director (Ban Giám Đốc)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var res = pm.response.json();",
+                  "pm.test(\"Login success with DIRECTOR role\", function () {",
+                  "    pm.expect(res.isSuccess).to.be.true;",
+                  "    pm.expect(res.data.roles).to.include('DIRECTOR');",
+                  "});",
+                  "if (res.data && res.data.token) {",
+                  "    pm.collectionVariables.set(\"director_token\", res.data.token);",
+                  "    console.log(\"[SUCCESS] Saved director_token!\");",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"giamdoc\",\n  \"password\": \"Password123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/identity/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "identity", "login"]
+            },
+            "description": "Đăng nhập tài khoản Giám đốc (tự động lưu director_token)."
+          },
+          "response": []
+        },
+        {
+          "name": "3. Login Manager (Trưởng phòng KD)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var res = pm.response.json();",
+                  "pm.test(\"Login success with MANAGER role\", function () {",
+                  "    pm.expect(res.isSuccess).to.be.true;",
+                  "    pm.expect(res.data.roles).to.include('MANAGER');",
+                  "});",
+                  "if (res.data && res.data.token) {",
+                  "    pm.collectionVariables.set(\"manager_token\", res.data.token);",
+                  "    console.log(\"[SUCCESS] Saved manager_token!\");",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"truongphong_kd\",\n  \"password\": \"Password123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/identity/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "identity", "login"]
+            },
+            "description": "Đăng nhập tài khoản Trưởng phòng kinh doanh (tự động lưu manager_token)."
+          },
+          "response": []
+        },
+        {
+          "name": "4. Login Staff (Nhân viên KD)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var res = pm.response.json();",
+                  "pm.test(\"Login success with STAFF role\", function () {",
+                  "    pm.expect(res.isSuccess).to.be.true;",
+                  "    pm.expect(res.data.roles).to.include('STAFF');",
+                  "});",
+                  "if (res.data && res.data.token) {",
+                  "    pm.collectionVariables.set(\"staff_token\", res.data.token);",
+                  "    console.log(\"[SUCCESS] Saved staff_token!\");",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"nhanvien_kd\",\n  \"password\": \"Password123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/identity/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "identity", "login"]
+            },
+            "description": "Đăng nhập tài khoản Nhân viên (tự động lưu staff_token)."
+          },
+          "response": []
+        },
+        {
+          "name": "5. Login Fail - Wrong Password",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 401 Unauthorized\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});",
+                  "var res = pm.response.json();",
+                  "pm.test(\"Failed login response returned\", function () {",
+                  "    pm.expect(res.isSuccess).to.be.false;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"SaiMatKhau123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/identity/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "identity", "login"]
+            },
+            "description": "Kiểm thử đăng nhập thất bại với sai mật khẩu (kỳ vọng trả về 401)."
+          },
+          "response": []
+        },
+        {
+          "name": "6. Login Fail - Non-existent User",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 401 Unauthorized\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});",
+                  "var res = pm.response.json();",
+                  "pm.test(\"Failed response returned\", function () {",
+                  "    pm.expect(res.isSuccess).to.be.false;",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"tai_khoan_ma_9999\",\n  \"password\": \"Password123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/identity/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "identity", "login"]
+            },
+            "description": "Kiểm thử đăng nhập với tài khoản không tồn tại (kỳ vọng 401)."
+          },
+          "response": []
+        },
+        {
+          "name": "7. Get Current User Profile (/me)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var res = pm.response.json();",
+                  "pm.test(\"User profile matches Admin\", function () {",
+                  "    pm.expect(res.isSuccess).to.be.true;",
+                  "    pm.expect(res.data.username).to.eql(\"admin\");",
+                  "    pm.expect(res.data.roles).to.include(\"ADMIN\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/identity/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "identity", "me"]
+            },
+            "description": "Lấy thông tin người dùng đang đăng nhập dựa trên JWT Bearer token."
+          },
+          "response": []
+        },
+        {
+          "name": "8. Refresh Token (Rotation)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var res = pm.response.json();",
+                  "pm.test(\"New token & refresh token returned\", function () {",
+                  "    pm.expect(res.isSuccess).to.be.true;",
+                  "    pm.expect(res.data.token).to.be.a('string');",
+                  "    pm.expect(res.data.refreshToken).to.be.a('string');",
+                  "});",
+                  "if (res.data && res.data.token) {",
+                  "    pm.collectionVariables.set(\"admin_token\", res.data.token);",
+                  "    pm.collectionVariables.set(\"admin_refresh_token\", res.data.refreshToken);",
+                  "    console.log(\"[SUCCESS] Token rotated and updated!\");",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{admin_refresh_token}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/identity/refresh-token",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "identity", "refresh-token"]
+            },
+            "description": "Gia hạn access token mới và thu hồi token cũ (Refresh Token Rotation)."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "02 - RBAC & Authorization (TASK-19)",
+      "item": [
+        {
+          "name": "1. Admin Policy - Admin Request (Expect 200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Admin successfully authorized (200 OK)\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/identity/rbac/admin-only",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "identity", "rbac", "admin-only"]
+            },
+            "description": "Admin truy cập endpoint yêu cầu quyền ADMIN -> Thành công (200)."
+          },
+          "response": []
+        },
+        {
+          "name": "2. Admin Policy - Staff Request (Expect 403 Forbidden)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Staff access forbidden (403 Forbidden)\", function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{staff_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/identity/rbac/admin-only",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "identity", "rbac", "admin-only"]
+            },
+            "description": "Staff truy cập endpoint chỉ dành cho Admin -> Bị chặn 403 Forbidden."
+          },
+          "response": []
+        },
+        {
+          "name": "3. Director Policy - Director Request (Expect 200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Director authorized (200 OK)\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{director_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/identity/rbac/director-only",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "identity", "rbac", "director-only"]
+            },
+            "description": "Giám đốc truy cập endpoint dành cho Ban Giám Đốc."
+          },
+          "response": []
+        },
+        {
+          "name": "4. Manager Policy - Manager Request (Expect 200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Manager authorized (200 OK)\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{manager_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/identity/rbac/manager-only",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "identity", "rbac", "manager-only"]
+            },
+            "description": "Trưởng phòng truy cập endpoint cấp Manager."
+          },
+          "response": []
+        },
+        {
+          "name": "5. Staff Policy - Staff Request (Expect 200)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Staff authorized (200 OK)\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{staff_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/identity/rbac/staff-only",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "identity", "rbac", "staff-only"]
+            },
+            "description": "Nhân viên truy cập endpoint cấp Staff."
+          },
+          "response": []
+        },
+        {
+          "name": "6. RBAC No Token - Unauthorized (Expect 401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"No token returned 401 Unauthorized\", function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/identity/rbac/staff-only",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "identity", "rbac", "staff-only"]
+            },
+            "description": "Truy cập endpoint có bảo vệ mà không đính kèm Token -> Bị chặn 401 Unauthorized."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "03 - User & Role Management",
+      "item": [
+        {
+          "name": "1. Get All Users (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var res = pm.response.json();",
+                  "pm.test(\"Returned seeded users list\", function () {",
+                  "    pm.expect(res.isSuccess).to.be.true;",
+                  "    pm.expect(res.data.length).to.be.at.least(4);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/identity/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "identity", "users"]
+            },
+            "description": "Lấy danh sách tất cả người dùng trong hệ thống (Quyền Admin)."
+          },
+          "response": []
+        },
+        {
+          "name": "2. Get All Roles (Admin)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "var res = pm.response.json();",
+                  "pm.test(\"Returned 4 system roles\", function () {",
+                  "    pm.expect(res.isSuccess).to.be.true;",
+                  "    var roleCodes = res.data.map(function(r) { return r.code; });",
+                  "    pm.expect(roleCodes).to.include(\"ADMIN\");",
+                  "    pm.expect(roleCodes).to.include(\"DIRECTOR\");",
+                  "    pm.expect(roleCodes).to.include(\"MANAGER\");",
+                  "    pm.expect(roleCodes).to.include(\"STAFF\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/identity/roles",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "identity", "roles"]
+            },
+            "description": "Lấy danh sách 4 vai trò chuẩn (ADMIN, DIRECTOR, MANAGER, STAFF)."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
