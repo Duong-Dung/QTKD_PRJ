@@ -2,7 +2,9 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
+using Qtkd.BuildingBlocks.Common;
 using Qtkd.Modules.Customers.DTOs;
+using Qtkd.Modules.Customers.Entities;
 using Xunit;
 
 namespace Qtkd.IntegrationTests;
@@ -199,5 +201,162 @@ public class CustomerIntegrationTests : IClassFixture<QtkdWebApplicationFactory>
         var created = await response.Content.ReadFromJsonAsync<CustomerDto>(JsonOptions);
         Assert.NotNull(created);
         Assert.Equal(code, created.Code);
+    }
+
+    [Fact]
+    public async Task UpdateCustomerStatus_SuspendAndReactivate_Returns200OkWithCorrectState()
+    {
+        // 1. Tạo mới khách hàng
+        var code = $"STS{Random.Shared.Next(1000, 9999)}";
+        var tax = $"07{Random.Shared.Next(10000000, 99999999)}";
+
+        var createPayload = new CreateCustomerRequest
+        {
+            Code = code,
+            Name = "Công ty Kiểm tra Status",
+            TaxCode = tax,
+            Address = "Hải Phòng",
+            RepresentativeName = "Nguyễn Văn Status"
+        };
+
+        var createResp = await _client.PostAsJsonAsync("/api/customers", createPayload);
+        Assert.Equal(HttpStatusCode.Created, createResp.StatusCode);
+        var created = await createResp.Content.ReadFromJsonAsync<CustomerDto>(JsonOptions);
+        Assert.NotNull(created);
+        Assert.Equal(CustomerStatus.Active, created.Status);
+
+        // 2. Chuyển sang Suspended qua PATCH /api/customers/{id}/status
+        var suspendPayload = new UpdateCustomerStatusRequest
+        {
+            Status = CustomerStatus.Suspended,
+            Reason = "Vi phạm nghĩa vụ thanh toán hợp đồng"
+        };
+
+        var suspendResp = await _client.PatchAsJsonAsync($"/api/customers/{created.Id}/status", suspendPayload);
+        Assert.Equal(HttpStatusCode.OK, suspendResp.StatusCode);
+
+        var suspended = await suspendResp.Content.ReadFromJsonAsync<CustomerDto>(JsonOptions);
+        Assert.NotNull(suspended);
+        Assert.Equal(CustomerStatus.Suspended, suspended.Status);
+        Assert.Equal("Vi phạm nghĩa vụ thanh toán hợp đồng", suspended.SuspendedReason);
+        Assert.NotNull(suspended.SuspendedAt);
+
+        // 3. Kích hoạt lại (Active) qua PATCH /api/v1/customers/{id}/status
+        var reactivatePayload = new UpdateCustomerStatusRequest
+        {
+            Status = CustomerStatus.Active
+        };
+
+        var reactivateResp = await _client.PatchAsJsonAsync($"/api/v1/customers/{created.Id}/status", reactivatePayload);
+        Assert.Equal(HttpStatusCode.OK, reactivateResp.StatusCode);
+
+        var reactivated = await reactivateResp.Content.ReadFromJsonAsync<CustomerDto>(JsonOptions);
+        Assert.NotNull(reactivated);
+        Assert.Equal(CustomerStatus.Active, reactivated.Status);
+        Assert.Null(reactivated.SuspendedReason);
+        Assert.Null(reactivated.SuspendedAt);
+    }
+
+    [Fact]
+    public async Task UpdateCustomerStatus_WhenNotFound_Returns404NotFound()
+    {
+        var nonExistentId = Guid.NewGuid();
+        var payload = new UpdateCustomerStatusRequest
+        {
+            Status = CustomerStatus.Suspended,
+            Reason = "Không tồn tại"
+        };
+
+        var response = await _client.PatchAsJsonAsync($"/api/customers/{nonExistentId}/status", payload);
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+
+        var problem = await response.Content.ReadFromJsonAsync<ProblemDetails>(JsonOptions);
+        Assert.NotNull(problem);
+        Assert.Equal(404, problem.Status);
+    }
+
+    [Fact]
+    public async Task GetCustomers_WithPagination_Returns200OkWithPagedResult()
+    {
+        var response = await _client.GetAsync("/api/customers?pageIndex=1&pageSize=5");
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var paged = await response.Content.ReadFromJsonAsync<PagedResult<CustomerDto>>(JsonOptions);
+        Assert.NotNull(paged);
+        Assert.NotNull(paged.Items);
+        Assert.Equal(1, paged.PageIndex);
+        Assert.Equal(5, paged.PageSize);
+        Assert.True(paged.TotalCount >= 0);
+    }
+
+    [Fact]
+    public async Task GetCustomers_WithSearchTerm_ReturnsMatchingCustomer()
+    {
+        // 1. Tạo khách hàng có từ khóa tìm kiếm duy nhất
+        var uniqueSuffix = Guid.NewGuid().ToString("N")[..8];
+        var uniqueName = $"Công ty Tìm Kiếm {uniqueSuffix}";
+        var code = $"SR{Random.Shared.Next(1000, 9999)}";
+        var tax = $"08{Random.Shared.Next(10000000, 99999999)}";
+
+        var payload = new CreateCustomerRequest
+        {
+            Code = code,
+            Name = uniqueName,
+            TaxCode = tax,
+            Address = "Đà Nẵng",
+            RepresentativeName = "Đại diện Tìm Kiếm"
+        };
+
+        var createResp = await _client.PostAsJsonAsync("/api/customers", payload);
+        Assert.Equal(HttpStatusCode.Created, createResp.StatusCode);
+
+        // 2. Tìm kiếm theo từ khóa duy nhất
+        var searchResp = await _client.GetAsync($"/api/customers?searchTerm={uniqueSuffix}");
+        Assert.Equal(HttpStatusCode.OK, searchResp.StatusCode);
+
+        var paged = await searchResp.Content.ReadFromJsonAsync<PagedResult<CustomerDto>>(JsonOptions);
+        Assert.NotNull(paged);
+        Assert.Single(paged.Items);
+        Assert.Equal(code, paged.Items[0].Code);
+        Assert.Equal(uniqueName, paged.Items[0].Name);
+    }
+
+    [Fact]
+    public async Task GetCustomers_WithStatusFilter_ReturnsOnlyMatchingStatus()
+    {
+        // 1. Tạo 1 khách hàng và tạm ngưng
+        var code = $"SF{Random.Shared.Next(1000, 9999)}";
+        var tax = $"09{Random.Shared.Next(10000000, 99999999)}";
+
+        var createPayload = new CreateCustomerRequest
+        {
+            Code = code,
+            Name = "Khách Hàng Tạm Ngưng Lọc",
+            TaxCode = tax,
+            Address = "Cần Thơ",
+            RepresentativeName = "Đại diện Cần Thơ"
+        };
+
+        var createResp = await _client.PostAsJsonAsync("/api/customers", createPayload);
+        Assert.Equal(HttpStatusCode.Created, createResp.StatusCode);
+        var created = await createResp.Content.ReadFromJsonAsync<CustomerDto>(JsonOptions);
+        Assert.NotNull(created);
+
+        // Tạm ngưng
+        var suspendResp = await _client.PatchAsJsonAsync($"/api/customers/{created.Id}/status", new UpdateCustomerStatusRequest
+        {
+            Status = CustomerStatus.Suspended,
+            Reason = "Lọc kiểm thử"
+        });
+        Assert.Equal(HttpStatusCode.OK, suspendResp.StatusCode);
+
+        // 2. Lọc theo trạng thái Suspended
+        var filterResp = await _client.GetAsync("/api/customers?status=Suspended");
+        Assert.Equal(HttpStatusCode.OK, filterResp.StatusCode);
+
+        var paged = await filterResp.Content.ReadFromJsonAsync<PagedResult<CustomerDto>>(JsonOptions);
+        Assert.NotNull(paged);
+        Assert.NotEmpty(paged.Items);
+        Assert.All(paged.Items, item => Assert.Equal(CustomerStatus.Suspended, item.Status));
     }
 }

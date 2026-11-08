@@ -123,3 +123,45 @@ public class UpdateCustomerValidator : AbstractValidator<UpdateCustomerRequest>
             .When(x => !string.IsNullOrWhiteSpace(x.ContactEmail));
     }
 }
+
+/// <summary>
+/// Validator cho yêu cầu chuyển đổi trạng thái khách hàng (TASK-25)
+/// </summary>
+public class UpdateCustomerStatusValidator : AbstractValidator<UpdateCustomerStatusRequest>
+{
+    public UpdateCustomerStatusValidator()
+    {
+        RuleFor(x => x.Status)
+            .IsInEnum().WithMessage("Trạng thái khách hàng không hợp lệ (chỉ chấp nhận Active hoặc Suspended).");
+
+        RuleFor(x => x.Reason)
+            .MaximumLength(500).WithMessage("Lý do tạm ngưng không được vượt quá 500 ký tự.")
+            .When(x => !string.IsNullOrWhiteSpace(x.Reason));
+    }
+}
+
+/// <summary>
+/// Validator cho yêu cầu truy vấn danh sách khách hàng (TASK-25)
+/// </summary>
+public class GetCustomersQueryValidator : AbstractValidator<GetCustomersQuery>
+{
+    public GetCustomersQueryValidator()
+    {
+        RuleFor(x => x.PageIndex)
+            .GreaterThanOrEqualTo(1).WithMessage("PageIndex phải lớn hơn hoặc bằng 1.");
+
+        RuleFor(x => x.PageSize)
+            .InclusiveBetween(1, 100).WithMessage("PageSize phải nằm trong khoảng từ 1 đến 100.");
+
+        RuleFor(x => x.Status)
+            .IsInEnum().When(x => x.Status.HasValue).WithMessage("Trạng thái lọc không hợp lệ.");
+
+        RuleFor(x => x.SearchTerm)
+            .MaximumLength(100).WithMessage("Từ khóa tìm kiếm không được vượt quá 100 ký tự.")
+            .When(x => !string.IsNullOrWhiteSpace(x.SearchTerm));
+
+        RuleFor(x => x.Keyword)
+            .MaximumLength(100).WithMessage("Từ khóa tìm kiếm không được vượt quá 100 ký tự.")
+            .When(x => !string.IsNullOrWhiteSpace(x.Keyword));
+    }
+}

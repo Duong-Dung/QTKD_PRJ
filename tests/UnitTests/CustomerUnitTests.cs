@@ -22,6 +22,8 @@ public class CustomerUnitTests
 {
     private readonly CreateCustomerValidator _createValidator = new();
     private readonly UpdateCustomerValidator _updateValidator = new();
+    private readonly UpdateCustomerStatusValidator _statusValidator = new();
+    private readonly GetCustomersQueryValidator _queryValidator = new();
 
     private CustomersDbContext CreateInMemoryDbContext()
     {
@@ -884,6 +886,503 @@ public class CustomerUnitTests
         Assert.NotEmpty(ex.Errors);
         Assert.Contains(nameof(UpdateCustomerRequest.Name), ex.Errors.Keys);
         Assert.Contains(nameof(UpdateCustomerRequest.TaxCode), ex.Errors.Keys);
+    }
+
+    #endregion
+
+    #region UpdateCustomerStatusValidator Tests (TASK-25)
+
+    [Theory]
+    [InlineData(CustomerStatus.Active)]
+    [InlineData(CustomerStatus.Suspended)]
+    public void UpdateCustomerStatusValidator_WithValidStatus_ShouldPass(CustomerStatus status)
+    {
+        var req = new UpdateCustomerStatusRequest
+        {
+            Status = status,
+            Reason = "Lý do hợp lệ"
+        };
+
+        var result = _statusValidator.Validate(req);
+        Assert.True(result.IsValid);
+    }
+
+    [Fact]
+    public void UpdateCustomerStatusValidator_WithInvalidStatusEnum_ShouldFail()
+    {
+        var req = new UpdateCustomerStatusRequest
+        {
+            Status = (CustomerStatus)999,
+            Reason = "Trạng thái không tồn tại"
+        };
+
+        var result = _statusValidator.Validate(req);
+        Assert.False(result.IsValid);
+        Assert.Contains(result.Errors, e => e.PropertyName == nameof(UpdateCustomerStatusRequest.Status));
+    }
+
+    [Fact]
+    public void UpdateCustomerStatusValidator_WithReasonExceeding500Chars_ShouldFail()
+    {
+        var req = new UpdateCustomerStatusRequest
+        {
+            Status = CustomerStatus.Suspended,
+            Reason = new string('A', 501)
+        };
+
+        var result = _statusValidator.Validate(req);
+        Assert.False(result.IsValid);
+        Assert.Contains(result.Errors, e => e.PropertyName == nameof(UpdateCustomerStatusRequest.Reason));
+    }
+
+    #endregion
+
+    #region GetCustomersQueryValidator Tests (TASK-25)
+
+    [Fact]
+    public void GetCustomersQueryValidator_WithDefaultValues_ShouldPass()
+    {
+        var query = new GetCustomersQuery();
+        var result = _queryValidator.Validate(query);
+        Assert.True(result.IsValid);
+    }
+
+    [Fact]
+    public void GetCustomersQueryValidator_WithValidCustomValues_ShouldPass()
+    {
+        var query = new GetCustomersQuery
+        {
+            PageIndex = 2,
+            PageSize = 25,
+            Status = CustomerStatus.Active,
+            SearchTerm = "Logistics Hải Phòng"
+        };
+
+        var result = _queryValidator.Validate(query);
+        Assert.True(result.IsValid);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    [InlineData(-10)]
+    public void GetCustomersQueryValidator_WithInvalidPageIndex_ShouldFail(int invalidPageIndex)
+    {
+        var query = new GetCustomersQuery { PageIndex = invalidPageIndex };
+        var result = _queryValidator.Validate(query);
+        Assert.False(result.IsValid);
+        Assert.Contains(result.Errors, e => e.PropertyName == nameof(GetCustomersQuery.PageIndex));
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    [InlineData(101)]
+    [InlineData(500)]
+    public void GetCustomersQueryValidator_WithInvalidPageSize_ShouldFail(int invalidPageSize)
+    {
+        var query = new GetCustomersQuery { PageSize = invalidPageSize };
+        var result = _queryValidator.Validate(query);
+        Assert.False(result.IsValid);
+        Assert.Contains(result.Errors, e => e.PropertyName == nameof(GetCustomersQuery.PageSize));
+    }
+
+    [Fact]
+    public void GetCustomersQueryValidator_WithInvalidStatusEnum_ShouldFail()
+    {
+        var query = new GetCustomersQuery { Status = (CustomerStatus)999 };
+        var result = _queryValidator.Validate(query);
+        Assert.False(result.IsValid);
+        Assert.Contains(result.Errors, e => e.PropertyName == nameof(GetCustomersQuery.Status));
+    }
+
+    [Fact]
+    public void GetCustomersQueryValidator_WithSearchTermTooLong_ShouldFail()
+    {
+        var query = new GetCustomersQuery { SearchTerm = new string('S', 101) };
+        var result = _queryValidator.Validate(query);
+        Assert.False(result.IsValid);
+        Assert.Contains(result.Errors, e => e.PropertyName == nameof(GetCustomersQuery.SearchTerm));
+    }
+
+    #endregion
+
+    #region CustomerService - UpdateStatusAsync Tests (TASK-25)
+
+    [Fact]
+    public async Task CustomerService_UpdateStatusAsync_WhenSuspendingCustomer_SetsSuspendedState()
+    {
+        // Arrange
+        using var dbContext = CreateInMemoryDbContext();
+        var customer = new Customer
+        {
+            Id = Guid.NewGuid(),
+            Code = "CUST-SUSP-01",
+            Name = "Khách Hàng Tạm Ngưng",
+            TaxCode = "0109990001",
+            Address = "Hà Nội",
+            RepresentativeName = "Nguyễn Văn Suspended",
+            Status = CustomerStatus.Active
+        };
+        dbContext.Customers.Add(customer);
+        await dbContext.SaveChangesAsync();
+
+        var service = new CustomerService(dbContext, _createValidator, _updateValidator, _statusValidator, _queryValidator);
+
+        var req = new UpdateCustomerStatusRequest
+        {
+            Status = CustomerStatus.Suspended,
+            Reason = "Vi phạm điều khoản thanh toán hợp đồng dịch vụ cảng"
+        };
+
+        // Act
+        var result = await service.UpdateStatusAsync(customer.Id, req);
+
+        // Assert
+        Assert.Equal(CustomerStatus.Suspended, result.Status);
+        Assert.Equal("Suspended", result.StatusName);
+        Assert.Equal("Vi phạm điều khoản thanh toán hợp đồng dịch vụ cảng", result.SuspendedReason);
+        Assert.NotNull(result.SuspendedAt);
+        Assert.NotNull(result.UpdatedAt);
+
+        var dbEntity = await dbContext.Customers.FindAsync(customer.Id);
+        Assert.NotNull(dbEntity);
+        Assert.Equal(CustomerStatus.Suspended, dbEntity.Status);
+        Assert.Equal("Vi phạm điều khoản thanh toán hợp đồng dịch vụ cảng", dbEntity.SuspendedReason);
+        Assert.NotNull(dbEntity.SuspendedAt);
+    }
+
+    [Fact]
+    public async Task CustomerService_UpdateStatusAsync_WhenReactivatingCustomer_ClearsSuspendedState()
+    {
+        // Arrange
+        using var dbContext = CreateInMemoryDbContext();
+        var customer = new Customer
+        {
+            Id = Guid.NewGuid(),
+            Code = "CUST-REACT-01",
+            Name = "Khách Hàng Kích Hoạt Lại",
+            TaxCode = "0109990002",
+            Address = "Hải Phòng",
+            RepresentativeName = "Trần Văn Active",
+            Status = CustomerStatus.Suspended,
+            SuspendedReason = "Tạm ngưng trước đó",
+            SuspendedAt = DateTimeOffset.UtcNow.AddDays(-10)
+        };
+        dbContext.Customers.Add(customer);
+        await dbContext.SaveChangesAsync();
+
+        var service = new CustomerService(dbContext, _createValidator, _updateValidator, _statusValidator, _queryValidator);
+
+        var req = new UpdateCustomerStatusRequest
+        {
+            Status = CustomerStatus.Active
+        };
+
+        // Act
+        var result = await service.UpdateStatusAsync(customer.Id, req);
+
+        // Assert
+        Assert.Equal(CustomerStatus.Active, result.Status);
+        Assert.Equal("Active", result.StatusName);
+        Assert.Null(result.SuspendedReason);
+        Assert.Null(result.SuspendedAt);
+        Assert.NotNull(result.UpdatedAt);
+
+        var dbEntity = await dbContext.Customers.FindAsync(customer.Id);
+        Assert.NotNull(dbEntity);
+        Assert.Equal(CustomerStatus.Active, dbEntity.Status);
+        Assert.Null(dbEntity.SuspendedReason);
+        Assert.Null(dbEntity.SuspendedAt);
+    }
+
+    [Fact]
+    public async Task CustomerService_UpdateStatusAsync_WhenCustomerNotFound_ThrowsNotFoundException()
+    {
+        // Arrange
+        using var dbContext = CreateInMemoryDbContext();
+        var service = new CustomerService(dbContext, _createValidator, _updateValidator, _statusValidator, _queryValidator);
+
+        var req = new UpdateCustomerStatusRequest
+        {
+            Status = CustomerStatus.Suspended,
+            Reason = "Lý do"
+        };
+
+        // Act & Assert
+        await Assert.ThrowsAsync<NotFoundException>(() => service.UpdateStatusAsync(Guid.NewGuid(), req));
+    }
+
+    [Fact]
+    public async Task CustomerService_UpdateStatusAsync_WhenRequestInvalid_ThrowsValidationAppException()
+    {
+        // Arrange
+        using var dbContext = CreateInMemoryDbContext();
+        var service = new CustomerService(dbContext, _createValidator, _updateValidator, _statusValidator, _queryValidator);
+
+        var req = new UpdateCustomerStatusRequest
+        {
+            Status = (CustomerStatus)888, // Invalid enum
+            Reason = new string('E', 501) // Exceeding max length
+        };
+
+        // Act & Assert
+        await Assert.ThrowsAsync<ValidationAppException>(() => service.UpdateStatusAsync(Guid.NewGuid(), req));
+    }
+
+    #endregion
+
+    #region CustomerService - GetPagedAsync Tests (TASK-25)
+
+    [Fact]
+    public async Task CustomerService_GetPagedAsync_DefaultParameters_ReturnsFirstPageWithTotalCount()
+    {
+        // Arrange
+        using var dbContext = CreateInMemoryDbContext();
+        for (int i = 1; i <= 15; i++)
+        {
+            dbContext.Customers.Add(new Customer
+            {
+                Id = Guid.NewGuid(),
+                Code = $"CUST-PG-{i:D3}",
+                Name = $"Công ty Cảng Logistics {i}",
+                TaxCode = $"010000{i:D4}",
+                Address = "Hà Nội",
+                RepresentativeName = $"Người Đại Diện {i}",
+                CreatedAt = DateTimeOffset.UtcNow.AddMinutes(i)
+            });
+        }
+        await dbContext.SaveChangesAsync();
+
+        var service = new CustomerService(dbContext, _createValidator, _updateValidator, _statusValidator, _queryValidator);
+
+        // Act (Default: PageIndex = 1, PageSize = 10)
+        var result = await service.GetPagedAsync(new GetCustomersQuery());
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(10, result.Items.Count);
+        Assert.Equal(15, result.TotalCount);
+        Assert.Equal(1, result.PageIndex);
+        Assert.Equal(10, result.PageSize);
+        Assert.Equal(2, result.TotalPages);
+        Assert.False(result.HasPreviousPage);
+        Assert.True(result.HasNextPage);
+        // Kiểm tra sắp xếp CreatedAt descending: bản ghi thứ 15 tạo sau cùng phải đứng đầu
+        Assert.Equal("CUST-PG-015", result.Items[0].Code);
+    }
+
+    [Fact]
+    public async Task CustomerService_GetPagedAsync_SecondPage_ReturnsRemainingItems()
+    {
+        // Arrange
+        using var dbContext = CreateInMemoryDbContext();
+        for (int i = 1; i <= 15; i++)
+        {
+            dbContext.Customers.Add(new Customer
+            {
+                Id = Guid.NewGuid(),
+                Code = $"CUST-PG2-{i:D3}",
+                Name = $"Công ty {i}",
+                TaxCode = $"020000{i:D4}",
+                Address = "Hải Phòng",
+                RepresentativeName = $"Đại diện {i}",
+                CreatedAt = DateTimeOffset.UtcNow.AddMinutes(i)
+            });
+        }
+        await dbContext.SaveChangesAsync();
+
+        var service = new CustomerService(dbContext, _createValidator, _updateValidator, _statusValidator, _queryValidator);
+
+        // Act
+        var result = await service.GetPagedAsync(new GetCustomersQuery { PageIndex = 2, PageSize = 10 });
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(5, result.Items.Count);
+        Assert.Equal(15, result.TotalCount);
+        Assert.Equal(2, result.PageIndex);
+        Assert.Equal(2, result.TotalPages);
+        Assert.True(result.HasPreviousPage);
+        Assert.False(result.HasNextPage);
+    }
+
+    [Fact]
+    public async Task CustomerService_GetPagedAsync_SearchByCode_ReturnsMatchingCustomers()
+    {
+        // Arrange
+        using var dbContext = CreateInMemoryDbContext();
+        dbContext.Customers.AddRange(
+            new Customer { Id = Guid.NewGuid(), Code = "CUST-HANOI-01", Name = "Công ty Alpha", TaxCode = "0100000010", Address = "Hà Nội", RepresentativeName = "A" },
+            new Customer { Id = Guid.NewGuid(), Code = "CUST-SAIGON-02", Name = "Công ty Beta", TaxCode = "0100000020", Address = "TP.HCM", RepresentativeName = "B" },
+            new Customer { Id = Guid.NewGuid(), Code = "CUST-DANANG-03", Name = "Công ty Gamma", TaxCode = "0100000030", Address = "Đà Nẵng", RepresentativeName = "C" }
+        );
+        await dbContext.SaveChangesAsync();
+
+        var service = new CustomerService(dbContext, _createValidator, _updateValidator, _statusValidator, _queryValidator);
+
+        // Act
+        var result = await service.GetPagedAsync(new GetCustomersQuery { SearchTerm = "saigon" });
+
+        // Assert
+        Assert.Single(result.Items);
+        Assert.Equal("CUST-SAIGON-02", result.Items[0].Code);
+        Assert.Equal(1, result.TotalCount);
+    }
+
+    [Fact]
+    public async Task CustomerService_GetPagedAsync_SearchByName_ReturnsMatchingCustomers()
+    {
+        // Arrange
+        using var dbContext = CreateInMemoryDbContext();
+        dbContext.Customers.AddRange(
+            new Customer { Id = Guid.NewGuid(), Code = "CUST-001", Name = "Công ty Tân Cảng Sài Gòn", TaxCode = "0300111222", Address = "TP.HCM", RepresentativeName = "A" },
+            new Customer { Id = Guid.NewGuid(), Code = "CUST-002", Name = "Công ty Tiếp Vận Biển Đông", TaxCode = "0300333444", Address = "Hải Phòng", RepresentativeName = "B" }
+        );
+        await dbContext.SaveChangesAsync();
+
+        var service = new CustomerService(dbContext, _createValidator, _updateValidator, _statusValidator, _queryValidator);
+
+        // Act
+        var result = await service.GetPagedAsync(new GetCustomersQuery { SearchTerm = "Biển Đông" });
+
+        // Assert
+        Assert.Single(result.Items);
+        Assert.Equal("CUST-002", result.Items[0].Code);
+        Assert.Equal("Công ty Tiếp Vận Biển Đông", result.Items[0].Name);
+    }
+
+    [Fact]
+    public async Task CustomerService_GetPagedAsync_SearchByTaxCode_ReturnsMatchingCustomers()
+    {
+        // Arrange
+        using var dbContext = CreateInMemoryDbContext();
+        dbContext.Customers.AddRange(
+            new Customer { Id = Guid.NewGuid(), Code = "CUST-TAX-1", Name = "Công ty Một", TaxCode = "0109999001", Address = "HN", RepresentativeName = "A" },
+            new Customer { Id = Guid.NewGuid(), Code = "CUST-TAX-2", Name = "Công ty Hai", TaxCode = "0308888002", Address = "HCM", RepresentativeName = "B" }
+        );
+        await dbContext.SaveChangesAsync();
+
+        var service = new CustomerService(dbContext, _createValidator, _updateValidator, _statusValidator, _queryValidator);
+
+        // Act
+        var result = await service.GetPagedAsync(new GetCustomersQuery { SearchTerm = "0308888" });
+
+        // Assert
+        Assert.Single(result.Items);
+        Assert.Equal("CUST-TAX-2", result.Items[0].Code);
+    }
+
+    [Fact]
+    public async Task CustomerService_GetPagedAsync_SearchUsingKeywordAlias_WorksIdentically()
+    {
+        // Arrange
+        using var dbContext = CreateInMemoryDbContext();
+        dbContext.Customers.Add(new Customer
+        {
+            Id = Guid.NewGuid(),
+            Code = "CUST-KEYWORD",
+            Name = "Công ty Đại Dương Xanh",
+            TaxCode = "0107776665",
+            Address = "Nha Trang",
+            RepresentativeName = "Nguyễn Văn D"
+        });
+        await dbContext.SaveChangesAsync();
+
+        var service = new CustomerService(dbContext, _createValidator, _updateValidator, _statusValidator, _queryValidator);
+
+        // Act: Dùng query.Keyword thay vì SearchTerm
+        var result = await service.GetPagedAsync(new GetCustomersQuery { Keyword = "đại dương" });
+
+        // Assert
+        Assert.Single(result.Items);
+        Assert.Equal("CUST-KEYWORD", result.Items[0].Code);
+    }
+
+    [Fact]
+    public async Task CustomerService_GetPagedAsync_FilterByStatus_ReturnsOnlyMatchingStatus()
+    {
+        // Arrange
+        using var dbContext = CreateInMemoryDbContext();
+        dbContext.Customers.AddRange(
+            new Customer { Id = Guid.NewGuid(), Code = "ACT-1", Name = "Active 1", TaxCode = "010001", Address = "HN", RepresentativeName = "A", Status = CustomerStatus.Active },
+            new Customer { Id = Guid.NewGuid(), Code = "ACT-2", Name = "Active 2", TaxCode = "010002", Address = "HN", RepresentativeName = "B", Status = CustomerStatus.Active },
+            new Customer { Id = Guid.NewGuid(), Code = "SUS-1", Name = "Suspended 1", TaxCode = "010003", Address = "HN", RepresentativeName = "C", Status = CustomerStatus.Suspended }
+        );
+        await dbContext.SaveChangesAsync();
+
+        var service = new CustomerService(dbContext, _createValidator, _updateValidator, _statusValidator, _queryValidator);
+
+        // Act 1: Lọc Active
+        var activeResult = await service.GetPagedAsync(new GetCustomersQuery { Status = CustomerStatus.Active });
+        Assert.Equal(2, activeResult.TotalCount);
+        Assert.All(activeResult.Items, c => Assert.Equal(CustomerStatus.Active, c.Status));
+
+        // Act 2: Lọc Suspended
+        var suspendedResult = await service.GetPagedAsync(new GetCustomersQuery { Status = CustomerStatus.Suspended });
+        Assert.Single(suspendedResult.Items);
+        Assert.Equal("SUS-1", suspendedResult.Items[0].Code);
+        Assert.Equal(CustomerStatus.Suspended, suspendedResult.Items[0].Status);
+
+        // Act 3: Không lọc status
+        var allResult = await service.GetPagedAsync(new GetCustomersQuery { Status = null });
+        Assert.Equal(3, allResult.TotalCount);
+    }
+
+    [Fact]
+    public async Task CustomerService_GetPagedAsync_SearchAndFilterCombined_ReturnsIntersection()
+    {
+        // Arrange
+        using var dbContext = CreateInMemoryDbContext();
+        dbContext.Customers.AddRange(
+            new Customer { Id = Guid.NewGuid(), Code = "LOG-01", Name = "Logistics Miền Bắc", TaxCode = "010101", Address = "HN", RepresentativeName = "A", Status = CustomerStatus.Active },
+            new Customer { Id = Guid.NewGuid(), Code = "LOG-02", Name = "Logistics Miền Nam", TaxCode = "010102", Address = "HCM", RepresentativeName = "B", Status = CustomerStatus.Suspended },
+            new Customer { Id = Guid.NewGuid(), Code = "TRK-01", Name = "Trucking Hải Phòng", TaxCode = "010103", Address = "HP", RepresentativeName = "C", Status = CustomerStatus.Active }
+        );
+        await dbContext.SaveChangesAsync();
+
+        var service = new CustomerService(dbContext, _createValidator, _updateValidator, _statusValidator, _queryValidator);
+
+        // Act: Tìm "Logistics" VÀ trạng thái Active
+        var result = await service.GetPagedAsync(new GetCustomersQuery
+        {
+            SearchTerm = "Logistics",
+            Status = CustomerStatus.Active
+        });
+
+        // Assert: Chỉ có LOG-01 khớp cả 2 tiêu chí
+        Assert.Single(result.Items);
+        Assert.Equal("LOG-01", result.Items[0].Code);
+        Assert.Equal(CustomerStatus.Active, result.Items[0].Status);
+    }
+
+    [Fact]
+    public async Task CustomerService_GetPagedAsync_WhenNoMatchFound_ReturnsEmptyItemsWithTotalCountZero()
+    {
+        // Arrange
+        using var dbContext = CreateInMemoryDbContext();
+        dbContext.Customers.Add(new Customer
+        {
+            Id = Guid.NewGuid(),
+            Code = "EXISTING-01",
+            Name = "Công ty Hiện Hữu",
+            TaxCode = "0101112223",
+            Address = "HN",
+            RepresentativeName = "A"
+        });
+        await dbContext.SaveChangesAsync();
+
+        var service = new CustomerService(dbContext, _createValidator, _updateValidator, _statusValidator, _queryValidator);
+
+        // Act
+        var result = await service.GetPagedAsync(new GetCustomersQuery { SearchTerm = "KHONG_TON_TAI_TRONG_DB" });
+
+        // Assert
+        Assert.Empty(result.Items);
+        Assert.Equal(0, result.TotalCount);
+        Assert.Equal(0, result.TotalPages);
+        Assert.False(result.HasPreviousPage);
+        Assert.False(result.HasNextPage);
     }
 
     #endregion
