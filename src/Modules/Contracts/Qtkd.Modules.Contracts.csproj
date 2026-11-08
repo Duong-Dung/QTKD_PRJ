@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\BuildingBlocks\Qtkd.BuildingBlocks.csproj" />
+    <ProjectReference Include="..\Customers\Qtkd.Modules.Customers.csproj" />
   </ItemGroup>
 
   <PropertyGroup>
@@ -13,5 +14,8 @@
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
-</Project>
 
+  <ItemGroup>
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="12.2.0" />
+  </ItemGroup>
+</Project>
