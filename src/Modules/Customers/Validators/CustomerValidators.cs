@@ -21,10 +21,16 @@ public static class CustomerValidationRules
         if (string.IsNullOrWhiteSpace(code)) return false;
         return Regex.IsMatch(code.Trim(), CustomerCodeRegex);
     }
+
+    public static bool IsValidPhoneNumber(string? phone)
+    {
+        if (string.IsNullOrWhiteSpace(phone)) return true; // Phone là trường tùy chọn
+        return Regex.IsMatch(phone.Trim(), PhoneNumberRegex);
+    }
 }
 
 /// <summary>
-/// Validator cho yêu cầu tạo mới khách hàng (TASK-22)
+/// Validator cho yêu cầu tạo mới khách hàng (TASK-22, TASK-24)
 /// </summary>
 public class CreateCustomerValidator : AbstractValidator<CreateCustomerRequest>
 {
@@ -32,8 +38,7 @@ public class CreateCustomerValidator : AbstractValidator<CreateCustomerRequest>
     {
         RuleFor(x => x.Code)
             .NotEmpty().WithMessage("Mã khách hàng không được để trống.")
-            .MaximumLength(20).WithMessage("Mã khách hàng không được vượt quá 20 ký tự.")
-            .Matches(CustomerValidationRules.CustomerCodeRegex)
+            .Must(CustomerValidationRules.IsValidCustomerCode)
             .WithMessage("Mã khách hàng chỉ được chứa từ 3 đến 20 ký tự chữ cái, số, gạch ngang (-) hoặc gạch dưới (_).");
 
         RuleFor(x => x.Name)
@@ -42,8 +47,7 @@ public class CreateCustomerValidator : AbstractValidator<CreateCustomerRequest>
 
         RuleFor(x => x.TaxCode)
             .NotEmpty().WithMessage("Mã số thuế không được để trống.")
-            .MaximumLength(14).WithMessage("Mã số thuế không được vượt quá 14 ký tự.")
-            .Matches(CustomerValidationRules.TaxCodeRegex)
+            .Must(CustomerValidationRules.IsValidTaxCode)
             .WithMessage("Mã số thuế không đúng định dạng (gồm 10 chữ số hoặc 13 chữ số có dấu gạch ngang, ví dụ: 0101234567 hoặc 0101234567-001).");
 
         RuleFor(x => x.Address)
@@ -64,7 +68,7 @@ public class CreateCustomerValidator : AbstractValidator<CreateCustomerRequest>
 
         RuleFor(x => x.ContactPhone)
             .MaximumLength(20).WithMessage("Số điện thoại liên hệ không được vượt quá 20 ký tự.")
-            .Matches(CustomerValidationRules.PhoneNumberRegex)
+            .Must(CustomerValidationRules.IsValidPhoneNumber)
             .WithMessage("Số điện thoại liên hệ không đúng định dạng.")
             .When(x => !string.IsNullOrWhiteSpace(x.ContactPhone));
 
@@ -76,7 +80,7 @@ public class CreateCustomerValidator : AbstractValidator<CreateCustomerRequest>
 }
 
 /// <summary>
-/// Validator cho yêu cầu cập nhật thông tin khách hàng (TASK-22)
+/// Validator cho yêu cầu cập nhật thông tin khách hàng (TASK-22, TASK-24)
 /// </summary>
 public class UpdateCustomerValidator : AbstractValidator<UpdateCustomerRequest>
 {
@@ -88,8 +92,7 @@ public class UpdateCustomerValidator : AbstractValidator<UpdateCustomerRequest>
 
         RuleFor(x => x.TaxCode)
             .NotEmpty().WithMessage("Mã số thuế không được để trống.")
-            .MaximumLength(14).WithMessage("Mã số thuế không được vượt quá 14 ký tự.")
-            .Matches(CustomerValidationRules.TaxCodeRegex)
+            .Must(CustomerValidationRules.IsValidTaxCode)
             .WithMessage("Mã số thuế không đúng định dạng (gồm 10 chữ số hoặc 13 chữ số có dấu gạch ngang, ví dụ: 0101234567 hoặc 0101234567-001).");
 
         RuleFor(x => x.Address)
@@ -110,7 +113,7 @@ public class UpdateCustomerValidator : AbstractValidator<UpdateCustomerRequest>
 
         RuleFor(x => x.ContactPhone)
             .MaximumLength(20).WithMessage("Số điện thoại liên hệ không được vượt quá 20 ký tự.")
-            .Matches(CustomerValidationRules.PhoneNumberRegex)
+            .Must(CustomerValidationRules.IsValidPhoneNumber)
             .WithMessage("Số điện thoại liên hệ không đúng định dạng.")
             .When(x => !string.IsNullOrWhiteSpace(x.ContactPhone));
 
