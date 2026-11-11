@@ -6,23 +6,26 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Inter', 'Roboto', 'Segoe UI', 'sans-serif'],
+        mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'monospace'],
+      },
       colors: {
         navy: {
           900: '#0B192C',
           800: '#0F172A',
           700: '#1E293B',
-          600: '#334155'
+          600: '#334155',
         },
         primary: {
           50: '#EFF6FF',
           100: '#DBEAFE',
           500: '#3B82F6',
           600: '#2563EB',
-          700: '#1D4ED8'
-        }
-      }
+          700: '#1D4ED8',
+        },
+      },
     },
   },
   plugins: [],
-}
-
+};
