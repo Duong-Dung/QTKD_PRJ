@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Qtkd.Modules.Contracts.DTOs;
 using Qtkd.Modules.Contracts.Services;
+using Qtkd.BuildingBlocks.Common;
 
 namespace Qtkd.Modules.Contracts.Controllers;
 
@@ -16,6 +17,18 @@ public class ContractsController : ControllerBase
     public ContractsController(IContractService contractService)
     {
         _contractService = contractService;
+    }
+
+    /// <summary>
+    /// TASK-31: Tìm kiếm, lọc và phân trang hợp đồng.
+    /// </summary>
+    [HttpGet]
+    [ProducesResponseType(typeof(PagedResult<ContractDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetPaged([FromQuery] GetContractsQuery query, CancellationToken ct)
+    {
+        var result = await _contractService.GetPagedAsync(query, ct);
+        return Ok(result);
     }
 
     /// <summary>
@@ -36,7 +49,7 @@ public class ContractsController : ControllerBase
     }
 
     /// <summary>
-    /// Lấy chi tiết thông tin hợp đồng theo ID
+    /// TASK-31: Lấy chi tiết thông tin hợp đồng theo ID (giữ implementation TASK-27)
     /// </summary>
     /// <param name="id">Mã định danh hợp đồng (UUID)</param>
     /// <param name="ct">CancellationToken</param>
@@ -65,6 +78,7 @@ public class ContractsController : ControllerBase
             {
                 "POST /api/v1/contracts",
                 "GET /api/v1/contracts/{id}",
+                "GET /api/v1/contracts?keyword=&status=&pageIndex=&pageSize=",
                 "GET /api/v1/contracts/info"
             }
         });

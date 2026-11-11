@@ -86,3 +86,18 @@ public class ContractDto
     public Guid? CreatedBy { get; set; }
     public Guid? UpdatedBy { get; set; }
 }
+/// <summary>
+/// TASK-31: Điều kiện tra cứu và phân trang hợp đồng.
+/// </summary>
+public class GetContractsQuery
+{
+    /// <summary>Tìm trong mã hợp đồng hoặc tiêu đề (không phân biệt hoa/thường).</summary>
+    public string? Keyword { get; set; }
+    public ContractStatus? Status { get; set; }
+    public Guid? CustomerId { get; set; }
+    public Guid? OwnerUserId { get; set; }
+    public DateOnly? EffectiveFrom { get; set; }
+    public DateOnly? EffectiveTo { get; set; }
+    public int PageIndex { get; set; } = 1;
+    public int PageSize { get; set; } = 10;
+}

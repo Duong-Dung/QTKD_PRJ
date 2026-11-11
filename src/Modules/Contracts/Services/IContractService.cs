@@ -1,4 +1,5 @@
 using Qtkd.Modules.Contracts.DTOs;
+using Qtkd.BuildingBlocks.Common;
 
 namespace Qtkd.Modules.Contracts.Services;
 
@@ -8,6 +9,9 @@ public interface IContractService
     /// Khởi tạo hợp đồng mới ở trạng thái Draft (TASK-27 - CTR-01)
     /// </summary>
     Task<ContractDto> CreateDraftAsync(CreateContractRequest request, CancellationToken ct = default);
+
+    /// <summary>Tra cứu hợp đồng có lọc và phân trang (TASK-31).</summary>
+    Task<PagedResult<ContractDto>> GetPagedAsync(GetContractsQuery query, CancellationToken ct = default);
 
     /// <summary>
     /// Tra cứu chi tiết hợp đồng theo ID

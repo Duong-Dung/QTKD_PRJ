@@ -1,6 +1,7 @@
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using Qtkd.BuildingBlocks.Exceptions;
+using Qtkd.BuildingBlocks.Common;
 using Qtkd.Modules.Contracts.DTOs;
 using Qtkd.Modules.Contracts.Entities;
 using Qtkd.Modules.Contracts.Persistence;
@@ -97,6 +98,61 @@ public class ContractService : IContractService
         await _dbContext.SaveChangesAsync(ct);
 
         return MapToDto(contract, customer);
+    }
+
+    /// <summary>Chỉ truy vấn đọc; không làm thay đổi trạng thái hợp đồng.</summary>
+    public async Task<PagedResult<ContractDto>> GetPagedAsync(GetContractsQuery query, CancellationToken ct = default)
+    {
+        if (query.PageIndex < 1)
+            throw new ValidationAppException(nameof(query.PageIndex), "PageIndex phải lớn hơn hoặc bằng 1.");
+        if (query.PageSize < 1 || query.PageSize > 100)
+            throw new ValidationAppException(nameof(query.PageSize), "PageSize phải từ 1 đến 100.");
+        if (query.EffectiveFrom.HasValue && query.EffectiveTo.HasValue &&
+            query.EffectiveFrom.Value > query.EffectiveTo.Value)
+            throw new ValidationAppException(nameof(query.EffectiveTo), "EffectiveTo phải lớn hơn hoặc bằng EffectiveFrom.");
+        if (!Enum.IsDefined(query.Status.GetValueOrDefault()) && query.Status.HasValue)
+            throw new ValidationAppException(nameof(query.Status), "Trạng thái hợp đồng không hợp lệ.");
+
+        var contracts = _dbContext.Contracts.AsNoTracking().AsQueryable();
+        if (query.Status.HasValue)
+            contracts = contracts.Where(c => c.Status == query.Status.Value);
+        if (query.CustomerId.HasValue)
+            contracts = contracts.Where(c => c.CustomerId == query.CustomerId.Value);
+        if (query.OwnerUserId.HasValue)
+            contracts = contracts.Where(c => c.OwnerUserId == query.OwnerUserId.Value);
+        if (query.EffectiveFrom.HasValue)
+            contracts = contracts.Where(c => c.EffectiveFrom >= query.EffectiveFrom.Value);
+        if (query.EffectiveTo.HasValue)
+            contracts = contracts.Where(c => c.EffectiveTo <= query.EffectiveTo.Value);
+
+        var keyword = query.Keyword?.Trim().ToLower();
+        if (!string.IsNullOrEmpty(keyword))
+            contracts = contracts.Where(c => c.Code.ToLower().Contains(keyword) ||
+                                              c.Title.ToLower().Contains(keyword));
+
+        var totalCount = await contracts.CountAsync(ct);
+        var items = await contracts
+            .OrderByDescending(c => c.CreatedAt)
+            .ThenBy(c => c.Id)
+            .Skip((query.PageIndex - 1) * query.PageSize)
+            .Take(query.PageSize)
+            .ToListAsync(ct);
+
+        // Dùng CustomerService sẵn có, không truy cập trực tiếp bảng của module khác.
+        // Tối ưu hóa: cache theo CustomerId trong cùng một request để tránh gọi lặp.
+        var customerCache = new Dictionary<Guid, CustomerDto?>();
+        var result = new List<ContractDto>(items.Count);
+        foreach (var contract in items)
+        {
+            if (!customerCache.TryGetValue(contract.CustomerId, out var customer))
+            {
+                try { customer = await _customerService.GetByIdAsync(contract.CustomerId, ct); }
+                catch (NotFoundException) { customer = null; }
+                customerCache[contract.CustomerId] = customer;
+            }
+            result.Add(MapToDto(contract, customer));
+        }
+        return new PagedResult<ContractDto>(result, query.PageIndex, query.PageSize, totalCount);
     }
 
     public async Task<ContractDto> GetByIdAsync(Guid id, CancellationToken ct = default)
