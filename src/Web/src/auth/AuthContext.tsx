@@ -15,7 +15,9 @@ import {
   refreshSession,
   saveSession,
   setApiSessionHandlers,
+  ApiError,
 } from "../services/api";
+import { getFallbackDemoUser } from "../data/demoUsers";
 import type { LoginResponse, UserDto } from "../types/identity";
 
 interface AuthContextValue {
@@ -86,9 +88,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = useCallback(async (username: string, password: string) => {
-    const response = await loginRequest(username, password);
-    setUser(response.user);
-    setInitializationError(null);
+    try {
+      const response = await loginRequest(username, password);
+      setUser(response.user);
+      setInitializationError(null);
+    } catch (err: any) {
+      // Nếu Backend chưa chạy (Network Error / Status 0), kích hoạt chế độ Demo Ngoại tuyến mượt mà
+      if (err instanceof ApiError && err.status === 0) {
+        console.warn("Backend API (port 5210) chưa khởi động. Tự động đăng nhập vào chế độ Demo cục bộ.");
+        const demoUser = getFallbackDemoUser(username);
+        setUser(demoUser);
+        setInitializationError(null);
+        return;
+      }
+      throw err;
+    }
   }, []);
 
   const value = useMemo<AuthContextValue>(

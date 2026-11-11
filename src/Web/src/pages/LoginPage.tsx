@@ -147,6 +147,46 @@ export default function LoginPage() {
             </button>
           </form>
 
+          {/* Cụm tài khoản mẫu điền nhanh */}
+          <div style={{ marginTop: '20px', padding: '12px', background: '#f8fafc', borderRadius: '10px', border: '1px solid #e2e8f0', fontSize: '12px' }}>
+            <div style={{ fontWeight: '700', color: '#1e293b', marginBottom: '8px' }}>
+              🔑 Tài khoản mẫu dùng thử (Click để điền nhanh):
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+              <button
+                type="button"
+                onClick={() => { setUsername('admin'); setPassword('P@ssword123!'); }}
+                style={{ textAlign: 'left', padding: '6px 8px', background: '#fff', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '11px', cursor: 'pointer' }}
+              >
+                <strong>admin</strong> <span style={{ color: '#64748b' }}>(Quản trị)</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => { setUsername('giamdoc'); setPassword('P@ssword123!'); }}
+                style={{ textAlign: 'left', padding: '6px 8px', background: '#fff', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '11px', cursor: 'pointer' }}
+              >
+                <strong>giamdoc</strong> <span style={{ color: '#64748b' }}>(Giám đốc)</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => { setUsername('tp_kinhdoanh'); setPassword('P@ssword123!'); }}
+                style={{ textAlign: 'left', padding: '6px 8px', background: '#fff', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '11px', cursor: 'pointer' }}
+              >
+                <strong>tp_kinhdoanh</strong> <span style={{ color: '#64748b' }}>(Trưởng phòng)</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => { setUsername('nv_kinhdoanh'); setPassword('P@ssword123!'); }}
+                style={{ textAlign: 'left', padding: '6px 8px', background: '#fff', border: '1px solid #cbd5e1', borderRadius: '6px', fontSize: '11px', cursor: 'pointer' }}
+              >
+                <strong>nv_kinhdoanh</strong> <span style={{ color: '#64748b' }}>(Nhân viên)</span>
+              </button>
+            </div>
+            <div style={{ marginTop: '8px', color: '#64748b', fontSize: '11px' }}>
+              Mật khẩu mặc định: <code style={{ background: '#e2e8f0', padding: '2px 4px', borderRadius: '4px', fontWeight: 'bold' }}>P@ssword123!</code>
+            </div>
+          </div>
+
           <div className="login-security"><Icon name="lock" size={15} /><span>Phiên làm việc được duy trì an toàn trên tab này</span></div>
           <div className="login-help">Cần hỗ trợ? <a href="mailto:support@qtkd.com">Liên hệ bộ phận quản trị</a></div>
         </div>
