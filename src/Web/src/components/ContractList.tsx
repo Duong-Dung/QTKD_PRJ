@@ -370,7 +370,6 @@ export const ContractList: React.FC<ContractListProps> = ({
       {/* Bottom Footer Info */}
       <div className="mt-8 pt-4 border-t border-slate-200 flex items-center justify-between text-xs text-slate-400">
         <div>ABC Logistics - Quản lý kinh doanh</div>
-        <div>Task 29 / Task 32 - Sprint 01 / PB-08, PB-09</div>
       </div>
 
       {/* Toast Notification Banner (Bottom Right) */}
