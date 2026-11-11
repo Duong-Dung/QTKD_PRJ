@@ -7,6 +7,7 @@ import DashboardPage from "../pages/DashboardPage";
 import CustomersPage from "../pages/CustomersPage";
 import UsersPage from "../pages/UsersPage";
 import ProfilePage from "../pages/ProfilePage";
+import ContractsPage from "../pages/ContractsPage";
 
 export default function AppShell() {
   const { user, logout, hasPermission } = useAuth();
@@ -123,8 +124,9 @@ export default function AppShell() {
             <Route path="/overview" element={<DashboardPage user={user} menu={visibleMenu} />} />
             <Route path="/profile" element={<ProfilePage user={user} />} />
             <Route path="/customers" element={<CustomersPage canManage={hasPermission("customers.manage")} />} />
+            <Route path="/contracts" element={<ContractsPage />} />
             <Route path="/users" element={<UsersPage />} />
-            {visibleMenu.filter((item) => !["overview", "customers", "users"].includes(item.id)).map((item) => (
+            {visibleMenu.filter((item) => !["overview", "customers", "contracts", "users"].includes(item.id)).map((item) => (
               <Route key={item.id} path={`/${item.id}`} element={<ModulePlaceholder title={item.label} description={item.description} />} />
             ))}
             <Route path="*" element={<Navigate to="/overview" replace />} />
