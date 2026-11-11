@@ -74,9 +74,12 @@ git pull origin develop
 
 ### Bước 2: Khởi động dịch vụ nền (PostgreSQL, RabbitMQ, pgAdmin)
 ```bash
-docker compose up -d
+# Trên Windows PowerShell:
+.\scripts\run-infra.ps1
+# Hoặc dùng lệnh trực tiếp (chỉ khởi chạy 3 dịch vụ hạ tầng, KHÔNG chạy container api):
+docker compose up -d postgres rabbitmq pgadmin
 ```
-*Đảm bảo Docker Desktop đang chạy. Kiểm tra trạng thái bằng `docker ps`.*
+*Đảm bảo Docker Desktop đang chạy. Lưu ý: Không chạy trực tiếp container `api` để tránh chiếm dụng cổng `5210` khi bạn chạy `dotnet run` ở Bước 5.*
 
 ### Bước 3: Cập nhật Migration vào Cơ sở dữ liệu
 Ứng dụng đã được cấu hình hàm `app.ApplyQtkdMigrations()` trong `Program.cs`. Khi bạn khởi động API ở môi trường `Development`, migration sẽ **tự động được áp dụng** vào database nếu chưa có.
@@ -106,14 +109,20 @@ Sau khi chạy, mở trình duyệt truy cập:
 - **Health Check:** [http://localhost:5210/health](http://localhost:5210/health) (kết quả `Healthy`)
 - **System Status:** [http://localhost:5210/api/v1/system/status](http://localhost:5210/api/v1/system/status)
 
-### Bước 6: Kiểm tra dữ liệu trên pgAdmin
-- Mở trình duyệt vào: [http://localhost: 5050](http://localhost:5050)
-- Đăng nhập: Email `admin@qtkd.com` | Mật khẩu: `admin`
-- Thêm kết nối tới Server:
-  - **Host name:** `postgres` (nếu chạy trong Docker network) hoặc `localhost` (nếu kết nối từ ngoài)
-  - **Port:** `5432`
-  - **Database / Username / Password:** `qtkd_db` / `postgres` / `postgres`
-- Bạn sẽ thấy đủ **18 bảng** tại schema `public`.
+### Bước 6: Kiểm tra dữ liệu trên pgAdmin (Web UI)
+1. **Truy cập:** Mở trình duyệt vào [http://localhost:5050](http://localhost:5050) (pgAdmin đã cấu hình tự động đăng nhập).
+2. **Nếu gặp hộp thoại "Master Password":** Nhập `admin` rồi nhấn **OK** (hoặc bấm **Cancel** / **Reset Master Password** để bỏ qua).
+3. **Thêm kết nối tới Server (chỉ cần làm 1 lần đầu):**
+   - Click chuột phải vào **Servers** (cột trái) $\rightarrow$ **Register** $\rightarrow$ **Server...**
+   - **Tab General:** Đặt Name bất kỳ (ví dụ: `QTKD Postgres`).
+   - **Tab Connection:**
+     - **Host name:** `postgres` *(Lưu ý: Bắt buộc dùng `postgres` vì pgAdmin và Database cùng chạy trong Docker network)*
+     - **Port:** `5432`
+     - **Maintenance database:** `qtkd_db`
+     - **Username:** `postgres`
+     - **Password:** `postgres`
+     - Tích chọn **Save password?** rồi nhấn **Save**.
+4. **Xem bảng và dữ liệu:** Vào `Servers` $\rightarrow$ `QTKD Postgres` $\rightarrow$ `Databases` $\rightarrow$ `qtkd_db` $\rightarrow$ `Schemas` $\rightarrow$ `public` $\rightarrow$ `Tables`. Bạn sẽ thấy đủ **18 bảng** tại schema `public`. *(Dữ liệu lưu an toàn vào Volume `qtkd_postgres_data`, không bị mất khi tắt máy/tắt Docker).*
 
 ---
 

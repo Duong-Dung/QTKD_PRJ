@@ -99,28 +99,46 @@ Tất cả 5 thành viên nhóm (**Hảo, Huy, Hoàng, Hiệu, Dũng**) cần th
 - [Git](https://git-scm.com/).
 
 ### 5.2. Bước 1: Khởi chạy hạ tầng qua Docker Compose (PostgreSQL, RabbitMQ, pgAdmin)
-Tại thư mục gốc dự án `QTKD_Project`, chạy một trong các lệnh sau:
+Tại thư mục gốc dự án `QTKD_PRJ`, chạy một trong các lệnh sau:
 
 - **Trên Windows PowerShell**:
   ```powershell
-  # Cách 1: Sử dụng script tự động
+  # Cách 1: Sử dụng script tự động (Khuyên dùng)
   .\scripts\run-infra.ps1
 
   # Cách 2: Dùng lệnh docker compose trực tiếp
-  docker compose up -d
-  # (hoặc docker-compose up -d)
+  docker compose up -d postgres rabbitmq pgadmin
+  # (Lưu ý: Chỉ bật 3 service hạ tầng, KHÔNG bật container api để dành port 5210 cho dotnet run ngoài máy)
   ```
 - **Trên macOS / Linux**:
   ```bash
   chmod +x ./scripts/*.sh
   ./scripts/run-infra.sh
+  # Hoặc: docker compose up -d postgres rabbitmq pgadmin
   ```
 
-#### 📌 Thông tin truy cập các dịch vụ hạ tầng:
+> ⚠️ **Lưu ý quan trọng**: Khi lập trình và debug cục bộ, **chỉ khởi chạy 3 dịch vụ nền** (`postgres`, `rabbitmq`, `pgadmin`). Không chạy container `api` để tránh xung đột cổng `5210` khi bạn gõ `dotnet run` ở Bước 3.
+
+#### 📌 Hướng dẫn truy cập và quản lý Database qua pgAdmin 4 (Web UI):
+1. **Truy cập:** Mở trình duyệt vào [http://localhost:5050](http://localhost:5050) (Hệ thống đã cấu hình tự động đăng nhập, không cần nhập Email/Password).
+2. **Nếu xuất hiện hộp thoại "Unlock Saved Passwords / Master Password":** Nhập mật khẩu `admin` rồi bấm **OK** (hoặc bấm **Cancel** / **Reset Master Password** nếu muốn bỏ qua).
+3. **Thêm kết nối vào Database (làm 1 lần đầu tiên):**
+   - Click chuột phải vào **Servers** (ở cột bên trái) $\rightarrow$ chọn **Register** $\rightarrow$ chọn **Server...**
+   - **Tab General:** Nhập Name bất kỳ (ví dụ: `QTKD Postgres`).
+   - **Tab Connection:**
+     - **Host name/address:** `postgres` *(Bắt buộc nhập chữ `postgres` vì pgAdmin và Postgres cùng nằm trong mạng Docker)*
+     - **Port:** `5432`
+     - **Maintenance database:** `qtkd_db`
+     - **Username:** `postgres`
+     - **Password:** `postgres`
+     - Tích chọn **Save password?** rồi nhấn nút **Save**.
+4. **Kiểm tra dữ liệu:** Vào `Servers` $\rightarrow$ `QTKD Postgres` $\rightarrow$ `Databases` $\rightarrow$ `qtkd_db` $\rightarrow$ `Schemas` $\rightarrow$ `public` $\rightarrow$ `Tables` để xem đầy đủ các bảng dữ liệu. *(Lưu ý: Mọi dữ liệu được lưu bền vững vào Docker Volume `qtkd_postgres_data`, không bị mất khi tắt Docker/tắt máy).*
+
+#### 📌 Thông tin kết nối các dịch vụ hạ tầng:
 | Dịch vụ | Địa chỉ truy cập | Thông tin đăng nhập | Mục đích sử dụng |
 | :--- | :--- | :--- | :--- |
 | **PostgreSQL 16** | `localhost:5432` | User: `postgres`<br>Pass: `postgres`<br>Database: `qtkd_db` | Cơ sở dữ liệu chính, tự động khởi tạo 10 schemas cho các module |
-| **pgAdmin 4 (Web UI)** | [http://localhost:5050](http://localhost:5050) | Email: `admin@qtkd.com`<br>Pass: `admin` | Giao diện đồ họa xem bảng, truy vấn SQL, kiểm tra dữ liệu |
+| **pgAdmin 4 (Web UI)** | [http://localhost:5050](http://localhost:5050) | Email: `admin@qtkd.com`<br>Pass: `admin`<br>Master Pass: `admin` | Giao diện đồ họa xem bảng, truy vấn SQL, kiểm tra dữ liệu |
 | **RabbitMQ Management** | [http://localhost:15672](http://localhost:15672) | User: `guest`<br>Pass: `guest` | Bảng điều khiển giám sát Message Queues & Event Bus |
 | **RabbitMQ AMQP** | `localhost:5672` | User: `guest`<br>Pass: `guest` | Cổng kết nối trao đổi sự kiện bất đồng bộ |
 

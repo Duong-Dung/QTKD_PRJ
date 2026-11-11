@@ -32,4 +32,23 @@ public static class PersistenceExtensions
         db.Database.Migrate();
         return app;
     }
+
+    public static async Task<WebApplication> SeedQtkdDataAsync(this WebApplication app)
+    {
+        var shouldMigrate = app.Configuration.GetValue<bool?>("Database:MigrateOnStartup")
+            ?? app.Environment.IsDevelopment();
+
+        var shouldSeed = app.Configuration.GetValue<bool?>("Database:SeedOnStartup")
+            ?? shouldMigrate;
+
+        if (!shouldSeed)
+        {
+            return app;
+        }
+
+        using var scope = app.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<QtkdDbContext>();
+        await QtkdDataSeeder.SeedAsync(db);
+        return app;
+    }
 }

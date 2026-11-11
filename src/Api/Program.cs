@@ -99,6 +99,7 @@ try
     var app = builder.Build();
 
     app.ApplyQtkdMigrations();
+    await app.SeedQtkdDataAsync();
 
     // 8. Pipeline xử lý HTTP Requests
     app.UseSerilogRequestLogging();
