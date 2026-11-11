@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Qtkd.Api.Persistence;
 using Qtkd.BuildingBlocks.Persistence;
+using Qtkd.Modules.Identity.Services;
 
 namespace Qtkd.Api.Extensions;
 
@@ -30,6 +31,11 @@ public static class PersistenceExtensions
         using var scope = app.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<QtkdDbContext>();
         db.Database.Migrate();
+
+        // Tự động khởi tạo dữ liệu mẫu cho Identity nếu chưa có (TASK-14 / TASK-18)
+        var seeder = scope.ServiceProvider.GetService<IdentityDbSeeder>();
+        seeder?.SeedAsync().GetAwaiter().GetResult();
+
         return app;
     }
 
