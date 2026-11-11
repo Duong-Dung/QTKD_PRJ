@@ -148,6 +148,16 @@ Mở trình duyệt truy cập:
 - **Health Check Endpoint**: [http://localhost:5210/health](http://localhost:5210/health) (Trả về `Healthy`)
 - **System Status Endpoint**: [http://localhost:5210/api/v1/system/status](http://localhost:5210/api/v1/system/status)
 
+### Chạy Frontend React
+
+Với Node.js 20.19+ hoặc 22.12+, chạy giao diện trong terminal riêng:
+```powershell
+cd src\Web
+npm install
+npm run dev
+```
+Mở [http://localhost:5173](http://localhost:5173). Chi tiết cấu hình và build tại [src/Web/README.md](./src/Web/README.md).
+
 ---
 
 ### 5.5. Quy trình làm việc với Git (Dành cho thành viên nhóm)
