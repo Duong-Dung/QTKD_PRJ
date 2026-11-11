@@ -1,14 +1,19 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   AlertCircle,
+  CheckCircle2,
   ChevronLeft,
   ChevronRight,
   Edit3,
+  Eye,
+  MoreVertical,
+  PauseCircle,
   Plus,
   RefreshCw,
   RotateCcw,
   Search,
   Users,
+  X,
 } from 'lucide-react';
 import {
   CustomerDto,
@@ -17,7 +22,9 @@ import {
   normalizeCustomerStatus,
 } from '../types/customer';
 import { ApiError, customerService } from '../services/customerService';
+import { CustomerDetail } from './CustomerDetail';
 import { CustomerForm } from './CustomerForm';
+import { CustomerStatusModal } from './CustomerStatusModal';
 import { StatusBadge } from './StatusBadge';
 import { ToastData } from './Toast';
 
@@ -26,20 +33,37 @@ interface CustomerWorkspaceProps {
   onNotify: (toast: ToastData) => void;
 }
 
-type WorkspaceView = 'list' | 'create' | 'edit';
+type WorkspaceView = 'list' | 'create' | 'edit' | 'detail';
+
+interface MenuState {
+  customer: CustomerDto;
+  top: number;
+  right: number;
+}
+
+function getVisiblePages(current: number, total: number): number[] {
+  if (total <= 5) {
+    return Array.from({ length: total }, (_, idx) => idx + 1);
+  }
+  const start = Math.max(1, Math.min(current - 2, total - 4));
+  return Array.from({ length: 5 }, (_, idx) => start + idx);
+}
 
 export const CustomerWorkspace: React.FC<CustomerWorkspaceProps> = ({
   onBreadcrumbChange,
   onNotify,
 }) => {
   const [view, setView] = useState<WorkspaceView>('list');
-  const [editingCustomer, setEditingCustomer] = useState<CustomerDto | null>(null);
+  const [selectedCustomer, setSelectedCustomer] = useState<CustomerDto | null>(null);
+  const [statusModalCustomer, setStatusModalCustomer] = useState<CustomerDto | null>(null);
+  const [openMenu, setOpenMenu] = useState<MenuState | null>(null);
+  const menuRef = useRef<HTMLDivElement | null>(null);
 
   const [searchInput, setSearchInput] = useState('');
   const [appliedSearch, setAppliedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<CustomerStatusName | ''>('');
   const [pageIndex, setPageIndex] = useState(1);
-  const pageSize = 10;
+  const [pageSize, setPageSize] = useState(10);
 
   const [pagedResult, setPagedResult] = useState<PagedResult<CustomerDto> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -71,7 +95,7 @@ export const CustomerWorkspace: React.FC<CustomerWorkspaceProps> = ({
         setIsLoading(false);
       }
     },
-    [appliedSearch, statusFilter, pageIndex]
+    [appliedSearch, statusFilter, pageIndex, pageSize]
   );
 
   useEffect(() => {
@@ -80,15 +104,55 @@ export const CustomerWorkspace: React.FC<CustomerWorkspaceProps> = ({
     return () => controller.abort();
   }, [fetchCustomers]);
 
+  // Debounced live search when typing
+  useEffect(() => {
+    const trimmed = searchInput.trim();
+    if (trimmed === appliedSearch) return;
+    const timer = window.setTimeout(() => {
+      setPageIndex(1);
+      setAppliedSearch(trimmed);
+    }, 350);
+    return () => window.clearTimeout(timer);
+  }, [searchInput, appliedSearch]);
+
+  // Close row action menu on outside click, Escape, or scroll
+  useEffect(() => {
+    if (!openMenu) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setOpenMenu(null);
+      }
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setOpenMenu(null);
+      }
+    };
+    const handleScroll = () => setOpenMenu(null);
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('scroll', handleScroll, true);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('scroll', handleScroll, true);
+    };
+  }, [openMenu]);
+
   useEffect(() => {
     if (view === 'create') {
       onBreadcrumbChange(['Trang chủ', 'Khách hàng', 'Thêm khách hàng mới']);
-    } else if (view === 'edit' && editingCustomer) {
-      onBreadcrumbChange(['Trang chủ', 'Khách hàng', `Cập nhật ${editingCustomer.code}`]);
+    } else if (view === 'edit' && selectedCustomer) {
+      onBreadcrumbChange(['Trang chủ', 'Khách hàng', `Cập nhật ${selectedCustomer.code}`]);
+    } else if (view === 'detail' && selectedCustomer) {
+      onBreadcrumbChange(['Trang chủ', 'Khách hàng', `${selectedCustomer.code} — ${selectedCustomer.name}`]);
     } else {
       onBreadcrumbChange(['Trang chủ', 'Khách hàng', 'Danh sách khách hàng']);
     }
-  }, [view, editingCustomer, onBreadcrumbChange]);
+  }, [view, selectedCustomer, onBreadcrumbChange]);
 
   const existingCodes = useMemo(
     () => (pagedResult?.items ?? []).map((item) => item.code),
@@ -96,19 +160,59 @@ export const CustomerWorkspace: React.FC<CustomerWorkspaceProps> = ({
   );
 
   const handleOpenCreate = () => {
-    setEditingCustomer(null);
+    setOpenMenu(null);
+    setSelectedCustomer(null);
     setView('create');
   };
 
   const handleOpenEdit = (customer: CustomerDto) => {
-    setEditingCustomer(customer);
+    setOpenMenu(null);
+    setSelectedCustomer(customer);
     setView('edit');
+  };
+
+  const handleOpenDetail = (customer: CustomerDto) => {
+    setOpenMenu(null);
+    setSelectedCustomer(customer);
+    setView('detail');
+  };
+
+  const handleOpenStatusModal = (customer: CustomerDto) => {
+    setOpenMenu(null);
+    setStatusModalCustomer(customer);
+  };
+
+  const handleToggleRowMenu = (
+    event: React.MouseEvent<HTMLButtonElement>,
+    customer: CustomerDto
+  ) => {
+    if (openMenu?.customer.id === customer.id) {
+      setOpenMenu(null);
+      return;
+    }
+
+    const rect = event.currentTarget.getBoundingClientRect();
+    const estimatedMenuHeight = 148;
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const top =
+      spaceBelow < estimatedMenuHeight
+        ? Math.max(8, rect.top - estimatedMenuHeight - 4)
+        : rect.bottom + 4;
+    const right = Math.max(8, window.innerWidth - rect.right);
+
+    setOpenMenu({ customer, top, right });
   };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setPageIndex(1);
     setAppliedSearch(searchInput.trim());
+  };
+
+  const handleClearSearch = () => {
+    setSearchInput('');
+    setPageIndex(1);
+    setAppliedSearch('');
   };
 
   const handleResetFilters = () => {
@@ -120,7 +224,7 @@ export const CustomerWorkspace: React.FC<CustomerWorkspaceProps> = ({
 
   const handleFormSuccess = (saved: CustomerDto, formMode: 'create' | 'edit') => {
     setView('list');
-    setEditingCustomer(null);
+    setSelectedCustomer(null);
     setPageIndex(1);
     void fetchCustomers();
 
@@ -134,29 +238,81 @@ export const CustomerWorkspace: React.FC<CustomerWorkspaceProps> = ({
     });
   };
 
-  if (view === 'create') {
-    return (
-      <CustomerForm
-        mode="create"
-        existingCodes={existingCodes}
-        onCancel={() => setView('list')}
-        onSuccess={handleFormSuccess}
-      />
-    );
-  }
+  const handleStatusModalSuccess = (updated: CustomerDto) => {
+    const newStatus = normalizeCustomerStatus(updated.status, updated.statusName);
+    setStatusModalCustomer(null);
 
-  if (view === 'edit' && editingCustomer) {
+    if (selectedCustomer?.id === updated.id) {
+      setSelectedCustomer(updated);
+    }
+
+    void fetchCustomers();
+
+    onNotify({
+      type: 'success',
+      title:
+        newStatus === 'Suspended'
+          ? 'Đã tạm ngưng khách hàng'
+          : 'Đã kích hoạt lại khách hàng',
+      description: `${updated.code} — ${updated.name}`,
+    });
+  };
+
+  const renderFormOrDetail = () => {
+    if (view === 'create') {
+      return (
+        <CustomerForm
+          mode="create"
+          existingCodes={existingCodes}
+          onCancel={() => setView('list')}
+          onSuccess={handleFormSuccess}
+        />
+      );
+    }
+
+    if (view === 'edit' && selectedCustomer) {
+      return (
+        <CustomerForm
+          mode="edit"
+          initialCustomer={selectedCustomer}
+          existingCodes={existingCodes}
+          onCancel={() => {
+            setView('list');
+            setSelectedCustomer(null);
+          }}
+          onSuccess={handleFormSuccess}
+        />
+      );
+    }
+
+    if (view === 'detail' && selectedCustomer) {
+      return (
+        <CustomerDetail
+          customer={selectedCustomer}
+          onBack={() => {
+            setView('list');
+            setSelectedCustomer(null);
+          }}
+          onEdit={handleOpenEdit}
+          onToggleStatus={handleOpenStatusModal}
+        />
+      );
+    }
+
+    return null;
+  };
+
+  const subView = renderFormOrDetail();
+  if (subView) {
     return (
-      <CustomerForm
-        mode="edit"
-        initialCustomer={editingCustomer}
-        existingCodes={existingCodes}
-        onCancel={() => {
-          setView('list');
-          setEditingCustomer(null);
-        }}
-        onSuccess={handleFormSuccess}
-      />
+      <>
+        {subView}
+        <CustomerStatusModal
+          customer={statusModalCustomer}
+          onClose={() => setStatusModalCustomer(null)}
+          onSuccess={handleStatusModalSuccess}
+        />
+      </>
     );
   }
 
@@ -165,6 +321,7 @@ export const CustomerWorkspace: React.FC<CustomerWorkspaceProps> = ({
   const totalPages = pagedResult?.totalPages ?? 0;
   const startItem = totalCount === 0 ? 0 : (pageIndex - 1) * pageSize + 1;
   const endItem = Math.min(pageIndex * pageSize, totalCount);
+  const visiblePages = getVisiblePages(pageIndex, totalPages);
 
   return (
     <div className="max-w-[1200px] mx-auto space-y-6">
@@ -172,10 +329,10 @@ export const CustomerWorkspace: React.FC<CustomerWorkspaceProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h1 className="text-[22px] leading-[30px] font-semibold text-[#111827]">
-            Quản lý Khách hàng
+            Khách hàng
           </h1>
           <p className="text-sm text-[#4B5563] mt-0.5">
-            Tạo mới, cập nhật và quản lý hồ sơ khách hàng doanh nghiệp trong hệ thống.
+            Tra cứu, cập nhật hồ sơ và quản lý trạng thái hợp tác của khách hàng doanh nghiệp.
           </p>
         </div>
 
@@ -190,7 +347,7 @@ export const CustomerWorkspace: React.FC<CustomerWorkspaceProps> = ({
       </div>
 
       {/* Search & Filter Bar */}
-      <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-sm p-4">
+      <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-sm p-4 space-y-3">
         <form
           onSubmit={handleSearchSubmit}
           className="flex flex-col md:flex-row items-stretch md:items-center gap-3"
@@ -201,9 +358,20 @@ export const CustomerWorkspace: React.FC<CustomerWorkspaceProps> = ({
               type="text"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              placeholder="Tìm theo mã khách hàng, tên công ty hoặc mã số thuế..."
-              className="w-full pl-9 pr-3 py-2 rounded-lg border border-[#E5E7EB] text-sm text-[#111827] placeholder:text-[#9CA3AF] focus:outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-blue-100"
+              placeholder="Tìm mã khách hàng, tên công ty hoặc mã số thuế..."
+              aria-label="Tìm kiếm khách hàng"
+              className="w-full pl-9 pr-8 py-2 rounded-lg border border-[#E5E7EB] text-sm text-[#111827] placeholder:text-[#9CA3AF] focus:outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-blue-100"
             />
+            {searchInput && (
+              <button
+                type="button"
+                onClick={handleClearSearch}
+                aria-label="Xóa từ khóa tìm kiếm"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#4B5563] p-0.5"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
           </div>
 
           <select
@@ -267,8 +435,8 @@ export const CustomerWorkspace: React.FC<CustomerWorkspaceProps> = ({
       {/* Customer Table */}
       <div className="bg-white rounded-xl border border-[#E5E7EB] shadow-sm overflow-hidden">
         {isLoading ? (
-          <div className="p-8 space-y-3">
-            {[1, 2, 3, 4].map((row) => (
+          <div className="p-6 space-y-3" aria-label="Đang tải dữ liệu">
+            {[1, 2, 3, 4, 5].map((row) => (
               <div key={row} className="h-12 bg-[#F3F4F6] rounded-lg animate-pulse" />
             ))}
           </div>
@@ -280,12 +448,12 @@ export const CustomerWorkspace: React.FC<CustomerWorkspaceProps> = ({
             <h2 className="text-base font-semibold text-[#111827]">
               {appliedSearch || statusFilter
                 ? 'Không tìm thấy khách hàng phù hợp'
-                : 'Chưa có hồ sơ khách hàng nào'}
+                : 'Chưa có khách hàng. Thêm khách hàng đầu tiên'}
             </h2>
             <p className="text-sm text-[#4B5563] max-w-md mx-auto">
               {appliedSearch || statusFilter
                 ? 'Thử thay đổi từ khóa tìm kiếm hoặc đặt lại bộ lọc trạng thái.'
-                : 'Bắt đầu bằng cách thêm khách hàng doanh nghiệp đầu tiên vào hệ thống.'}
+                : 'Bắt đầu bằng cách tạo hồ sơ khách hàng doanh nghiệp đầu tiên.'}
             </p>
             <div className="pt-2">
               {appliedSearch || statusFilter ? (
@@ -316,11 +484,10 @@ export const CustomerWorkspace: React.FC<CustomerWorkspaceProps> = ({
                   <tr className="bg-slate-50 border-b border-[#E5E7EB] text-xs font-semibold text-[#1E3A8A] uppercase tracking-wider">
                     <th className="py-3.5 px-4">Mã KH</th>
                     <th className="py-3.5 px-4">Tên khách hàng</th>
-                    <th className="py-3.5 px-4">Mã số thuế</th>
+                    <th className="py-3.5 px-4">MST</th>
                     <th className="py-3.5 px-4">Người đại diện</th>
-                    <th className="py-3.5 px-4">Liên hệ</th>
                     <th className="py-3.5 px-4">Trạng thái</th>
-                    <th className="py-3.5 px-4 text-right">Thao tác</th>
+                    <th className="py-3.5 px-4 text-right w-20">Hành động</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#E5E7EB] text-sm">
@@ -329,21 +496,35 @@ export const CustomerWorkspace: React.FC<CustomerWorkspaceProps> = ({
                       customer.status,
                       customer.statusName
                     );
+                    const isMenuOpen = openMenu?.customer.id === customer.id;
+
                     return (
                       <tr
                         key={customer.id}
                         className="hover:bg-[#EFF6FF] transition-colors"
                       >
-                        <td className="py-3.5 px-4 font-mono font-semibold text-[#1E3A8A] whitespace-nowrap">
-                          {customer.code}
+                        <td className="py-3.5 px-4 whitespace-nowrap">
+                          <button
+                            type="button"
+                            onClick={() => handleOpenDetail(customer)}
+                            className="font-mono font-semibold text-[#2563EB] hover:text-[#1E3A8A] hover:underline"
+                          >
+                            {customer.code}
+                          </button>
                         </td>
                         <td className="py-3.5 px-4 max-w-xs">
-                          <div className="font-semibold text-[#111827] truncate">
-                            {customer.name}
-                          </div>
-                          <div className="text-xs text-[#4B5563] truncate">
-                            {customer.address}
-                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleOpenDetail(customer)}
+                            className="text-left group block max-w-full"
+                          >
+                            <div className="font-semibold text-[#111827] group-hover:text-[#2563EB] truncate">
+                              {customer.name}
+                            </div>
+                            <div className="text-xs text-[#4B5563] truncate">
+                              {customer.address}
+                            </div>
+                          </button>
                         </td>
                         <td className="py-3.5 px-4 font-mono text-[#111827] whitespace-nowrap">
                           {customer.taxCode}
@@ -358,25 +539,29 @@ export const CustomerWorkspace: React.FC<CustomerWorkspaceProps> = ({
                             </div>
                           )}
                         </td>
-                        <td className="py-3.5 px-4 text-xs text-[#4B5563]">
-                          <div>{customer.contactPerson || '—'}</div>
-                          <div>
-                            {[customer.contactPhone, customer.contactEmail]
-                              .filter(Boolean)
-                              .join(' • ') || 'Chưa cập nhật'}
-                          </div>
-                        </td>
                         <td className="py-3.5 px-4 whitespace-nowrap">
-                          <StatusBadge status={status} />
+                          <div className="space-y-1">
+                            <StatusBadge status={status} />
+                            {status === 'Suspended' && customer.suspendedReason && (
+                              <div
+                                className="text-[11px] text-[#4B5563] max-w-[180px] truncate"
+                                title={customer.suspendedReason}
+                              >
+                                {customer.suspendedReason}
+                              </div>
+                            )}
+                          </div>
                         </td>
                         <td className="py-3.5 px-4 text-right whitespace-nowrap">
                           <button
                             type="button"
-                            onClick={() => handleOpenEdit(customer)}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#E5E7EB] bg-white text-xs font-semibold text-[#1E3A8A] hover:bg-[#DBEAFE] transition-colors"
+                            onClick={(e) => handleToggleRowMenu(e, customer)}
+                            aria-label={`Thao tác cho ${customer.code}`}
+                            aria-haspopup="menu"
+                            aria-expanded={isMenuOpen}
+                            className="p-1.5 rounded-lg border border-transparent hover:border-[#E5E7EB] hover:bg-white text-[#4B5563] hover:text-[#111827] transition-colors"
                           >
-                            <Edit3 className="w-3.5 h-3.5" />
-                            <span>Chỉnh sửa</span>
+                            <MoreVertical className="w-4 h-4" />
                           </button>
                         </td>
                       </tr>
@@ -388,11 +573,34 @@ export const CustomerWorkspace: React.FC<CustomerWorkspaceProps> = ({
 
             {/* Pagination Footer */}
             <div className="px-4 py-3 border-t border-[#E5E7EB] bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#4B5563]">
-              <div>
-                Hiển thị <span className="font-semibold text-[#111827]">{startItem}–{endItem}</span> trên{' '}
-                <span className="font-semibold text-[#111827]">{totalCount}</span> khách hàng
+              <div className="flex items-center gap-4">
+                <span>
+                  Hiển thị{' '}
+                  <span className="font-semibold text-[#111827]">
+                    {startItem}–{endItem}
+                  </span>{' '}
+                  / <span className="font-semibold text-[#111827]">{totalCount}</span> khách hàng
+                </span>
+
+                <label className="inline-flex items-center gap-1.5">
+                  <span>Hiển thị:</span>
+                  <select
+                    aria-label="Số dòng mỗi trang"
+                    value={pageSize}
+                    onChange={(e) => {
+                      setPageSize(Number(e.target.value));
+                      setPageIndex(1);
+                    }}
+                    className="rounded border border-[#E5E7EB] bg-white px-2 py-1 text-xs text-[#111827] focus:outline-none focus:border-[#2563EB]"
+                  >
+                    <option value={10}>10</option>
+                    <option value={20}>20</option>
+                    <option value={50}>50</option>
+                  </select>
+                </label>
               </div>
-              <div className="flex items-center gap-2">
+
+              <div className="flex items-center gap-1.5">
                 <button
                   type="button"
                   onClick={() => setPageIndex((p) => Math.max(1, p - 1))}
@@ -402,9 +610,23 @@ export const CustomerWorkspace: React.FC<CustomerWorkspaceProps> = ({
                 >
                   <ChevronLeft className="w-4 h-4" />
                 </button>
-                <span className="px-2 font-medium text-[#111827]">
-                  Trang {pageIndex} / {Math.max(1, totalPages)}
-                </span>
+
+                {visiblePages.map((pageNum) => (
+                  <button
+                    key={pageNum}
+                    type="button"
+                    onClick={() => setPageIndex(pageNum)}
+                    aria-current={pageNum === pageIndex ? 'page' : undefined}
+                    className={`min-w-[28px] h-7 px-2 rounded-lg text-xs font-semibold transition-colors ${
+                      pageNum === pageIndex
+                        ? 'bg-[#2563EB] text-white'
+                        : 'border border-[#E5E7EB] bg-white text-[#4B5563] hover:bg-[#F3F4F6]'
+                    }`}
+                  >
+                    {pageNum}
+                  </button>
+                ))}
+
                 <button
                   type="button"
                   onClick={() => setPageIndex((p) => p + 1)}
@@ -419,6 +641,68 @@ export const CustomerWorkspace: React.FC<CustomerWorkspaceProps> = ({
           </>
         )}
       </div>
+
+      {/* Fixed-position Row Action Menu (prevents overflow-x clipping on small row counts) */}
+      {openMenu && (
+        <div
+          ref={menuRef}
+          role="menu"
+          style={{ top: openMenu.top, right: openMenu.right }}
+          className="fixed z-40 w-48 rounded-xl bg-white shadow-lg border border-[#E5E7EB] py-1.5 text-sm"
+        >
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => handleOpenDetail(openMenu.customer)}
+            className="w-full px-3.5 py-2 text-left flex items-center gap-2.5 text-[#111827] hover:bg-[#EFF6FF] transition-colors"
+          >
+            <Eye className="w-4 h-4 text-[#4B5563]" />
+            <span>Xem chi tiết</span>
+          </button>
+
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => handleOpenEdit(openMenu.customer)}
+            className="w-full px-3.5 py-2 text-left flex items-center gap-2.5 text-[#111827] hover:bg-[#EFF6FF] transition-colors"
+          >
+            <Edit3 className="w-4 h-4 text-[#4B5563]" />
+            <span>Chỉnh sửa</span>
+          </button>
+
+          <div className="my-1 border-t border-[#E5E7EB]" />
+
+          {normalizeCustomerStatus(openMenu.customer.status, openMenu.customer.statusName) ===
+          'Active' ? (
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => handleOpenStatusModal(openMenu.customer)}
+              className="w-full px-3.5 py-2 text-left flex items-center gap-2.5 text-[#D97706] hover:bg-amber-50 font-medium transition-colors"
+            >
+              <PauseCircle className="w-4 h-4" />
+              <span>Tạm ngưng</span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => handleOpenStatusModal(openMenu.customer)}
+              className="w-full px-3.5 py-2 text-left flex items-center gap-2.5 text-[#16A34A] hover:bg-emerald-50 font-medium transition-colors"
+            >
+              <CheckCircle2 className="w-4 h-4" />
+              <span>Kích hoạt lại</span>
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Suspend / Reactivate Confirmation Modal */}
+      <CustomerStatusModal
+        customer={statusModalCustomer}
+        onClose={() => setStatusModalCustomer(null)}
+        onSuccess={handleStatusModalSuccess}
+      />
     </div>
   );
 };
