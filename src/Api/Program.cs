@@ -120,10 +120,8 @@ try
     // Chuyển hướng root '/' sang '/swagger' để mở nhanh trên trình duyệt
     app.MapGet("/", () => Results.Redirect("/swagger"));
 
-    app.UseCors("AllowAll");
-
     app.UseRouting();
-
+    app.UseCors("AllowAll");
     app.UseAuthentication();
     app.UseAuthorization();
 
