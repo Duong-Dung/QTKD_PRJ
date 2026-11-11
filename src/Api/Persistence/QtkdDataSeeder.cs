@@ -179,28 +179,34 @@ public static class QtkdDataSeeder
             }
         }
 
+        var rolesMap = await context.Roles.ToDictionaryAsync(r => r.Code, r => r.Id);
+
         // 1. ADMIN: Toàn bộ quyền
-        Assign(Ids.RoleAdmin, allPerms.Select(p => p.Code).ToArray());
+        if (rolesMap.TryGetValue("ADMIN", out var adminId))
+            Assign(adminId, allPerms.Select(p => p.Code).ToArray());
 
         // 2. DIRECTOR: Duyệt cấp cao, ký hợp đồng, xem báo cáo & kiểm toán
-        Assign(Ids.RoleDirector,
-            "contract.read", "contract.approve", "contract.reject", "contract.cancel",
-            "customer.read",
-            "workflow.read", "workflow.approve", "workflow.reject",
-            "audit.read", "pricing.manage", "payment.manage");
+        if (rolesMap.TryGetValue("DIRECTOR", out var directorId))
+            Assign(directorId,
+                "contract.read", "contract.approve", "contract.reject", "contract.cancel",
+                "customer.read",
+                "workflow.read", "workflow.approve", "workflow.reject",
+                "audit.read", "pricing.manage", "payment.manage");
 
         // 3. MANAGER: Quản lý phòng ban, rà soát hợp đồng, thao tác bước duyệt
-        Assign(Ids.RoleManager,
-            "contract.create", "contract.read", "contract.update", "contract.submit", "contract.approve", "contract.reject",
-            "customer.create", "customer.read", "customer.update",
-            "workflow.read", "workflow.approve", "workflow.reject",
-            "pricing.manage", "payment.manage");
+        if (rolesMap.TryGetValue("MANAGER", out var managerId))
+            Assign(managerId,
+                "contract.create", "contract.read", "contract.update", "contract.submit", "contract.approve", "contract.reject",
+                "customer.create", "customer.read", "customer.update",
+                "workflow.read", "workflow.approve", "workflow.reject",
+                "pricing.manage", "payment.manage");
 
         // 4. STAFF: Soạn thảo hợp đồng, gửi duyệt, quản lý khách hàng
-        Assign(Ids.RoleStaff,
-            "contract.create", "contract.read", "contract.update", "contract.submit",
-            "customer.create", "customer.read", "customer.update",
-            "workflow.read");
+        if (rolesMap.TryGetValue("STAFF", out var staffId))
+            Assign(staffId,
+                "contract.create", "contract.read", "contract.update", "contract.submit",
+                "customer.create", "customer.read", "customer.update",
+                "workflow.read");
 
         if (rolePermsToAdd.Count > 0)
         {
@@ -216,8 +222,10 @@ public static class QtkdDataSeeder
     {
         var existingUsernames = await context.Users.Select(u => u.Username.ToLower()).ToListAsync();
         var hasher = new PasswordHasher<User>();
+        var rolesMap = await context.Roles.ToDictionaryAsync(r => r.Code, r => r.Id);
+        var deptsMap = await context.Departments.ToDictionaryAsync(d => d.Code, d => d.Id);
 
-        var sampleUsers = new List<(User User, Guid RoleId)>
+        var sampleUsers = new List<(User User, string RoleCode, string DeptCode)>
         {
             (
                 new User
@@ -227,10 +235,9 @@ public static class QtkdDataSeeder
                     FullName = "Nguyễn Quản Trị",
                     Email = "admin@qtkd.com",
                     Phone = "0901000001",
-                    DepartmentId = Ids.DeptQuanTriHeThong,
                     IsActive = true
                 },
-                Ids.RoleAdmin
+                "ADMIN", "QT"
             ),
             (
                 new User
@@ -240,10 +247,9 @@ public static class QtkdDataSeeder
                     FullName = "Trần Giám Đốc",
                     Email = "director@qtkd.com",
                     Phone = "0902000002",
-                    DepartmentId = Ids.DeptBanGiamDoc,
                     IsActive = true
                 },
-                Ids.RoleDirector
+                "DIRECTOR", "BGD"
             ),
             (
                 new User
@@ -253,10 +259,9 @@ public static class QtkdDataSeeder
                     FullName = "Lê Trưởng Kinh Doanh",
                     Email = "manager.kd@qtkd.com",
                     Phone = "0903000003",
-                    DepartmentId = Ids.DeptKinhDoanh,
                     IsActive = true
                 },
-                Ids.RoleManager
+                "MANAGER", "KD"
             ),
             (
                 new User
@@ -266,10 +271,9 @@ public static class QtkdDataSeeder
                     FullName = "Phạm Nhân Viên KD",
                     Email = "staff.kd@qtkd.com",
                     Phone = "0904000004",
-                    DepartmentId = Ids.DeptKinhDoanh,
                     IsActive = true
                 },
-                Ids.RoleStaff
+                "STAFF", "KD"
             ),
             (
                 new User
@@ -279,10 +283,9 @@ public static class QtkdDataSeeder
                     FullName = "Hoàng Pháp Chế",
                     Email = "manager.pc@qtkd.com",
                     Phone = "0905000005",
-                    DepartmentId = Ids.DeptPhapChe,
                     IsActive = true
                 },
-                Ids.RoleManager
+                "MANAGER", "PC"
             ),
             (
                 new User
@@ -292,10 +295,9 @@ public static class QtkdDataSeeder
                     FullName = "Đỗ Kế Toán Trưởng",
                     Email = "manager.tc@qtkd.com",
                     Phone = "0906000006",
-                    DepartmentId = Ids.DeptKeToan,
                     IsActive = true
                 },
-                Ids.RoleManager
+                "MANAGER", "TCKT"
             ),
             (
                 new User
@@ -305,29 +307,35 @@ public static class QtkdDataSeeder
                     FullName = "Vũ Khai Thác",
                     Email = "staff.kt@qtkd.com",
                     Phone = "0907000007",
-                    DepartmentId = Ids.DeptKhaiThac,
                     IsActive = true
                 },
-                Ids.RoleStaff
+                "STAFF", "KT"
             )
         };
 
-        foreach (var (user, roleId) in sampleUsers)
+        foreach (var (user, roleCode, deptCode) in sampleUsers)
         {
             if (existingUsernames.Contains(user.Username.ToLower()))
             {
                 continue;
             }
 
+            if (deptsMap.TryGetValue(deptCode, out var deptId))
+            {
+                user.DepartmentId = deptId;
+            }
             user.PasswordHash = hasher.HashPassword(user, DefaultPassword);
             await context.Users.AddAsync(user);
 
-            var userRole = new UserRole
+            if (rolesMap.TryGetValue(roleCode, out var roleId))
             {
-                UserId = user.Id,
-                RoleId = roleId
-            };
-            await context.UserRoles.AddAsync(userRole);
+                var userRole = new UserRole
+                {
+                    UserId = user.Id,
+                    RoleId = roleId
+                };
+                await context.UserRoles.AddAsync(userRole);
+            }
         }
 
         await context.SaveChangesAsync();
@@ -393,6 +401,14 @@ public static class QtkdDataSeeder
             return;
         }
 
+        var rolesMap = await context.Roles.ToDictionaryAsync(r => r.Code, r => r.Id);
+        var deptsMap = await context.Departments.ToDictionaryAsync(d => d.Code, d => d.Id);
+
+        var managerRoleId = rolesMap.TryGetValue("MANAGER", out var mId) ? mId : (Guid?)null;
+        var directorRoleId = rolesMap.TryGetValue("DIRECTOR", out var dId) ? dId : (Guid?)null;
+        var phapCheDeptId = deptsMap.TryGetValue("PC", out var pcId) ? pcId : (Guid?)null;
+        var banGiamDocDeptId = deptsMap.TryGetValue("BGD", out var bgdId) ? bgdId : (Guid?)null;
+
         var workflow = new WorkflowDefinition
         {
             Id = Ids.WorkflowContractApproval,
@@ -409,8 +425,8 @@ public static class QtkdDataSeeder
                     StepOrder = 1,
                     Name = "Pháp chế rà soát hồ sơ & pháp lý",
                     AssigneeType = AssigneeType.RoleInDepartment,
-                    AssigneeRoleId = Ids.RoleManager,
-                    AssigneeDepartmentId = Ids.DeptPhapChe,
+                    AssigneeRoleId = managerRoleId,
+                    AssigneeDepartmentId = phapCheDeptId,
                     OnReject = OnRejectAction.RevisionRequested
                 },
                 new()
@@ -419,8 +435,8 @@ public static class QtkdDataSeeder
                     StepOrder = 2,
                     Name = "Ban Giám đốc phê duyệt hợp đồng",
                     AssigneeType = AssigneeType.RoleInDepartment,
-                    AssigneeRoleId = Ids.RoleDirector,
-                    AssigneeDepartmentId = Ids.DeptBanGiamDoc,
+                    AssigneeRoleId = directorRoleId,
+                    AssigneeDepartmentId = banGiamDocDeptId,
                     OnReject = OnRejectAction.Rejected
                 }
             }
