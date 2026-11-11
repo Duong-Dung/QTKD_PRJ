@@ -83,16 +83,20 @@ export const CustomerWorkspace: React.FC<CustomerWorkspaceProps> = ({
           },
           signal
         );
+        if (signal?.aborted) return;
         setPagedResult(result);
+        setLoadError(null);
       } catch (err) {
-        if ((err as Error).name === 'AbortError') return;
+        if ((err as Error).name === 'AbortError' || signal?.aborted) return;
         const message =
           err instanceof ApiError
             ? err.message
             : 'Không thể tải danh sách khách hàng từ hệ thống.';
         setLoadError(message);
       } finally {
-        setIsLoading(false);
+        if (!signal?.aborted) {
+          setIsLoading(false);
+        }
       }
     },
     [appliedSearch, statusFilter, pageIndex, pageSize]

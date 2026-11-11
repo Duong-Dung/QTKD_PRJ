@@ -10,7 +10,9 @@ import {
 } from '../types/customer';
 import { mapProblemDetailsToErrors } from '../utils/customerValidation';
 
-const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, '') ?? '';
+const API_BASE_URL = (
+  (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? 'http://localhost:5210'
+).replace(/\/$/, '');
 const CUSTOMERS_ENDPOINT = `${API_BASE_URL}/api/v1/customers`;
 
 export class ApiError extends Error {
@@ -64,7 +66,10 @@ async function requestJson<T>(url: string, init?: RequestInit): Promise<T> {
         ...init?.headers,
       },
     });
-  } catch {
+  } catch (error: unknown) {
+    if ((error as Error)?.name === 'AbortError' || init?.signal?.aborted) {
+      throw error;
+    }
     throw new ApiError(
       0,
       'Không thể kết nối đến máy chủ Backend API (http://localhost:5210). Vui lòng kiểm tra dịch vụ API đang chạy.'
