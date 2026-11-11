@@ -37,3 +37,4 @@ export interface Contract {
   createdAt: string;
   updatedAt?: string;
 }
+

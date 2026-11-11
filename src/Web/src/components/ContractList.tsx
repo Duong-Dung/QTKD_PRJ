@@ -176,11 +176,10 @@ export const ContractList: React.FC<ContractListProps> = ({
               setActiveTab('all');
               setCurrentPage(1);
             }}
-            className={`py-4 text-sm font-semibold border-b-2 transition-colors ${
-              activeTab === 'all'
+            className={`py-4 text-sm font-semibold border-b-2 transition-colors ${activeTab === 'all'
                 ? 'border-blue-600 text-blue-600'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
-            }`}
+              }`}
           >
             Tất cả hợp đồng
           </button>
@@ -189,11 +188,10 @@ export const ContractList: React.FC<ContractListProps> = ({
               setActiveTab('Draft');
               setCurrentPage(1);
             }}
-            className={`py-4 text-sm font-semibold border-b-2 transition-colors ${
-              activeTab === 'Draft'
+            className={`py-4 text-sm font-semibold border-b-2 transition-colors ${activeTab === 'Draft'
                 ? 'border-blue-600 text-blue-600'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
-            }`}
+              }`}
           >
             Bản nháp
           </button>
@@ -202,11 +200,10 @@ export const ContractList: React.FC<ContractListProps> = ({
               setActiveTab('PendingApproval');
               setCurrentPage(1);
             }}
-            className={`py-4 text-sm font-semibold border-b-2 transition-colors ${
-              activeTab === 'PendingApproval'
+            className={`py-4 text-sm font-semibold border-b-2 transition-colors ${activeTab === 'PendingApproval'
                 ? 'border-blue-600 text-blue-600'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
-            }`}
+              }`}
           >
             Chờ duyệt
           </button>
@@ -215,11 +212,10 @@ export const ContractList: React.FC<ContractListProps> = ({
               setActiveTab('Approved');
               setCurrentPage(1);
             }}
-            className={`py-4 text-sm font-semibold border-b-2 transition-colors ${
-              activeTab === 'Approved'
+            className={`py-4 text-sm font-semibold border-b-2 transition-colors ${activeTab === 'Approved'
                 ? 'border-blue-600 text-blue-600'
                 : 'border-transparent text-slate-500 hover:text-slate-800'
-            }`}
+              }`}
           >
             Đã phê duyệt
           </button>
@@ -341,11 +337,10 @@ export const ContractList: React.FC<ContractListProps> = ({
               <button
                 key={page}
                 onClick={() => setCurrentPage(page)}
-                className={`w-7 h-7 rounded text-xs font-medium transition-colors ${
-                  currentPage === page
+                className={`w-7 h-7 rounded text-xs font-medium transition-colors ${currentPage === page
                     ? 'bg-blue-50 border border-blue-500 text-blue-600 font-bold'
                     : 'border border-slate-200 hover:bg-slate-50 text-slate-700'
-                }`}
+                  }`}
               >
                 {page}
               </button>
