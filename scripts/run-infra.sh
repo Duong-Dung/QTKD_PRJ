@@ -20,7 +20,7 @@ if ! docker info &> /dev/null; then
     exit 1
 fi
 
-echo "[INFO] Đang khởi chạy các service qua docker compose..."
+echo "[INFO] Đang khởi chạy các service hạ tầng (postgres, rabbitmq, pgadmin)..."
 if command -v docker-compose &> /dev/null; then
     docker-compose up -d postgres rabbitmq pgadmin
 else

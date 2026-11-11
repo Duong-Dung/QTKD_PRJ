@@ -19,8 +19,8 @@ try {
     exit 1
 }
 
-# Khởi chạy các container nền
-Write-Host "[INFO] Đang khởi chạy các service nền qua docker-compose..." -ForegroundColor Yellow
+# Khởi chạy các container nền (Chỉ chạy 3 service hạ tầng, không chạy container api)
+Write-Host "[INFO] Đang khởi chạy các service nền (PostgreSQL, RabbitMQ, pgAdmin)..." -ForegroundColor Yellow
 if (Get-Command "docker-compose" -ErrorAction SilentlyContinue) {
     docker-compose up -d postgres rabbitmq pgadmin
 } else {
