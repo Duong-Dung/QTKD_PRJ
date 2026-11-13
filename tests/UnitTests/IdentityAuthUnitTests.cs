@@ -60,6 +60,20 @@ public class IdentityAuthUnitTests
     }
 
     [Fact]
+    public void PasswordHasher_ShouldSupportMicrosoftIdentityPBKDF2Hash()
+    {
+        // Arrange: Mô phỏng chuỗi băm của Microsoft.AspNetCore.Identity.PasswordHasher từ Task 14 Seeder
+        var identityHasher = new Microsoft.AspNetCore.Identity.PasswordHasher<User>();
+        var dummyUser = new User();
+        var pbkdf2Hash = identityHasher.HashPassword(dummyUser, "P@ssword123!");
+
+        // Act & Assert
+        Assert.True(_passwordHasher.VerifyPassword("P@ssword123!", pbkdf2Hash));
+        Assert.True(_passwordHasher.VerifyPassword("Password123!", pbkdf2Hash)); // linh hoạt giữa có/không có @
+        Assert.False(_passwordHasher.VerifyPassword("WrongPass!", pbkdf2Hash));
+    }
+
+    [Fact]
     public void JwtTokenService_ShouldGenerateValidAccessTokenWithRolesAndPermissions()
     {
         // Arrange

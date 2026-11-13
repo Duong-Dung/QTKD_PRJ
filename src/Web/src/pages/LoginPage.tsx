@@ -147,6 +147,44 @@ export default function LoginPage() {
             </button>
           </form>
 
+          <div style={{ marginTop: "1rem", paddingTop: "0.85rem", borderTop: "1px dashed #cbd5e1", fontSize: "0.82rem" }}>
+            <div style={{ fontWeight: 600, color: "#64748b", marginBottom: "0.4rem" }}>Tài khoản demo (Bấm để điền nhanh):</div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
+              <button
+                type="button"
+                className="button button--ghost"
+                style={{ fontSize: "0.75rem", padding: "0.2rem 0.5rem", borderRadius: "4px", border: "1px solid #cbd5e1" }}
+                onClick={() => { setUsername("admin"); setPassword("Password123!"); setError(""); }}
+              >
+                🔑 Admin
+              </button>
+              <button
+                type="button"
+                className="button button--ghost"
+                style={{ fontSize: "0.75rem", padding: "0.2rem 0.5rem", borderRadius: "4px", border: "1px solid #cbd5e1" }}
+                onClick={() => { setUsername("giamdoc"); setPassword("Password123!"); setError(""); }}
+              >
+                👔 Giám Đốc
+              </button>
+              <button
+                type="button"
+                className="button button--ghost"
+                style={{ fontSize: "0.75rem", padding: "0.2rem 0.5rem", borderRadius: "4px", border: "1px solid #cbd5e1" }}
+                onClick={() => { setUsername("tp_kinhdoanh"); setPassword("Password123!"); setError(""); }}
+              >
+                💼 Trưởng phòng KD
+              </button>
+              <button
+                type="button"
+                className="button button--ghost"
+                style={{ fontSize: "0.75rem", padding: "0.2rem 0.5rem", borderRadius: "4px", border: "1px solid #cbd5e1" }}
+                onClick={() => { setUsername("nv_kinhdoanh"); setPassword("Password123!"); setError(""); }}
+              >
+                📋 Nhân viên KD
+              </button>
+            </div>
+          </div>
+
           <div className="login-security"><Icon name="lock" size={15} /><span>Phiên làm việc được duy trì an toàn trên tab này</span></div>
           <div className="login-help">Cần hỗ trợ? <a href="mailto:support@qtkd.com">Liên hệ bộ phận quản trị</a></div>
         </div>
