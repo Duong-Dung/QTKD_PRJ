@@ -9,14 +9,62 @@ import UsersPage from "../pages/UsersPage";
 import ProfilePage from "../pages/ProfilePage";
 import ContractsPage from "../pages/ContractsPage";
 
+interface NotificationItem {
+  id: string;
+  title: string;
+  desc: string;
+  time: string;
+  read: boolean;
+  type: "contract" | "customer" | "approval";
+  link?: string;
+}
+
 export default function AppShell() {
   const { user, logout, hasPermission } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
+
+  // Danh sách thông báo mẫu đồng bộ với Section 4.9 của Figma Design Pack
+  const [notifications, setNotifications] = useState<NotificationItem[]>([
+    {
+      id: "notif-1",
+      title: "Hợp đồng chờ rà soát",
+      desc: "HĐ-2026-0007 (Cty Nam Á) đã được gửi duyệt, chuyển sang bước Pháp chế rà soát.",
+      time: "10 phút trước",
+      read: false,
+      type: "approval",
+      link: "/contracts",
+    },
+    {
+      id: "notif-2",
+      title: "Yêu cầu hoàn tất hồ sơ",
+      desc: "Khách hàng Cty TNHH Vận tải Biển Đông cần cập nhật mã số thuế bổ sung.",
+      time: "1 giờ trước",
+      read: false,
+      type: "customer",
+      link: "/customers",
+    },
+    {
+      id: "notif-3",
+      title: "Hợp đồng đã phê duyệt",
+      desc: "Ban Giám đốc đã ký duyệt hợp đồng dịch vụ kho bãi HĐ-2026-0003.",
+      time: "3 giờ trước",
+      read: false,
+      type: "contract",
+      link: "/contracts",
+    },
+  ]);
+
+  const unreadCount = notifications.filter((n) => !n.read).length;
+
+  const markAllNotificationsAsRead = () => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
+  };
 
   const visibleMenu = useMemo(() => (user ? getVisibleMenu(user) : []), [user]);
   const currentId = location.pathname.split("/")[1] || "overview";
@@ -44,7 +92,9 @@ export default function AppShell() {
     ADMIN: "Quản trị viên",
     DIRECTOR: "Ban Giám đốc",
     MANAGER: "Trưởng phòng",
-    STAFF: "Chuyên viên",
+    STAFF: "Chuyên viên Kinh doanh",
+    LEGAL: "Pháp chế",
+    ACCOUNTANT: "Kế toán",
   };
 
   const initials = user.fullName
@@ -55,25 +105,25 @@ export default function AppShell() {
     .toUpperCase();
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] text-slate-800 flex font-sans antialiased">
+    <div className="min-h-screen bg-[#F3F4F6] text-[#111827] flex font-sans antialiased">
       {/* Mobile Backdrop */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-sm lg:hidden transition-opacity"
+          className="fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-sm lg:hidden transition-opacity"
           onClick={() => setSidebarOpen(false)}
           aria-hidden="true"
         />
       )}
 
-      {/* 1. SIDEBAR NAVIGATION: Minimalist, Crisp, Modern */}
+      {/* 1. SIDEBAR NAVIGATION: 240px Fixed, Figma primary/700 Deep Navy branding */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200/80 flex flex-col justify-between transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-60 bg-white border-r border-[#E5E7EB] flex flex-col justify-between transition-transform duration-300 ease-in-out lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0 shadow-2xl" : "-translate-x-full"
         }`}
       >
         <div className="flex flex-col flex-1 min-h-0">
-          {/* Logo & Workspace header */}
-          <div className="p-5 border-b border-slate-100">
+          {/* Logo & Workspace Header - ABC Logistics */}
+          <div className="p-4 border-b border-[#E5E7EB]">
             <a
               href="/"
               onClick={(e) => {
@@ -83,45 +133,45 @@ export default function AppShell() {
               }}
               className="flex items-center gap-3 group"
             >
-              <span className="w-10 h-10 rounded-xl bg-gradient-to-tr from-orange-600 to-amber-500 text-white font-black text-xl flex items-center justify-center shadow-lg shadow-orange-600/25 group-hover:scale-105 transition-transform duration-200">
-                Q
+              <span className="w-10 h-10 rounded-lg bg-[#1E3A8A] text-white font-extrabold text-lg flex items-center justify-center shadow-md shadow-blue-900/20 group-hover:scale-105 transition-transform duration-200">
+                ABC
               </span>
               <div>
-                <span className="block text-sm font-black tracking-wider text-slate-900 leading-none">
-                  QTKD LOGISTICS
+                <span className="block text-sm font-bold tracking-tight text-[#111827] leading-tight">
+                  ABC LOGISTICS
                 </span>
-                <span className="block text-[10px] font-semibold text-slate-400 tracking-widest mt-1 uppercase">
-                  ENTERPRISE 4.0
+                <span className="block text-[11px] font-medium text-[#2563EB] tracking-wider uppercase mt-0.5">
+                  Hệ thống Quản trị QTKD
                 </span>
               </div>
             </a>
 
-            {/* Current Workspace Pill */}
-            <div className="mt-4 p-2.5 rounded-xl bg-slate-50 border border-slate-200/70 flex items-center gap-2.5">
-              <span className="w-7 h-7 rounded-lg bg-[#0F172A] text-white text-xs font-bold flex items-center justify-center">
-                A
+            {/* Current Department / User Pill */}
+            <div className="mt-3.5 p-2 rounded-lg bg-[#EFF6FF] border border-[#DBEAFE] flex items-center gap-2.5">
+              <span className="w-6 h-6 rounded-md bg-[#1E3A8A] text-white text-[11px] font-bold flex items-center justify-center shrink-0">
+                {initials}
               </span>
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-bold text-slate-800 truncate leading-tight">
-                  ABC Logistics
+                <p className="text-xs font-semibold text-[#1E3A8A] truncate leading-tight">
+                  {user.department?.name ?? "Phòng Kinh doanh"}
                 </p>
-                <p className="text-[10px] text-slate-500 truncate">
-                  {user.department?.name ?? "Doanh nghiệp"}
+                <p className="text-[10px] text-[#4B5563] truncate">
+                  {roleLabels[role] ?? role}
                 </p>
               </div>
-              <span className="w-2 h-2 rounded-full bg-emerald-500" title="Trực tuyến" />
+              <span className="w-2 h-2 rounded-full bg-[#16A34A]" title="Trực tuyến" />
             </div>
           </div>
 
           {/* Navigation Items List */}
-          <nav className="flex-1 overflow-y-auto p-4 space-y-6" aria-label="Menu chính">
+          <nav className="flex-1 overflow-y-auto p-3 space-y-5" aria-label="Menu chính">
             {sections.map((section) => (
-              <div key={section} className="space-y-1.5">
-                <span className="block px-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+              <div key={section} className="space-y-1">
+                <span className="block px-3 text-[10px] font-bold text-[#9CA3AF] uppercase tracking-wider">
                   {section}
                 </span>
 
-                <div className="space-y-1">
+                <div className="space-y-0.5">
                   {visibleMenu
                     .filter((item) => item.section === section)
                     .map((item) => {
@@ -134,15 +184,15 @@ export default function AppShell() {
                             navigate(`/${item.id}`);
                             setSidebarOpen(false);
                           }}
-                          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 text-left ${
+                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-all duration-150 text-left ${
                             isActive
-                              ? "bg-orange-50 text-orange-600 shadow-sm font-bold border border-orange-200/60"
-                              : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
+                              ? "bg-[#EFF6FF] text-[#2563EB] font-semibold border-l-4 border-[#2563EB]"
+                              : "text-[#4B5563] hover:text-[#111827] hover:bg-[#F3F4F6]"
                           }`}
                         >
                           <span
                             className={`transition-colors ${
-                              isActive ? "text-orange-600" : "text-slate-400"
+                              isActive ? "text-[#2563EB]" : "text-[#9CA3AF]"
                             }`}
                           >
                             <Icon
@@ -151,9 +201,6 @@ export default function AppShell() {
                             />
                           </span>
                           <span className="flex-1 truncate">{item.label}</span>
-                          {isActive && (
-                            <span className="w-1.5 h-1.5 rounded-full bg-orange-600" />
-                          )}
                         </button>
                       );
                     })}
@@ -163,54 +210,53 @@ export default function AppShell() {
           </nav>
         </div>
 
-        {/* Sidebar Footer / Support card */}
-        <div className="p-4 border-t border-slate-100 space-y-3">
-          <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 flex items-center gap-3">
-            <span className="w-8 h-8 rounded-lg bg-orange-100 text-orange-600 font-bold flex items-center justify-center text-xs shrink-0">
+        {/* Sidebar Footer */}
+        <div className="p-3 border-t border-[#E5E7EB] space-y-2">
+          <div className="p-2.5 rounded-lg bg-[#F3F4F6] border border-[#E5E7EB] flex items-center gap-2.5">
+            <span className="w-7 h-7 rounded-md bg-[#DBEAFE] text-[#2563EB] font-bold flex items-center justify-center text-xs shrink-0">
               ?
             </span>
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-bold text-slate-800">Cần hỗ trợ?</p>
-              <p className="text-[10px] text-slate-500 truncate">
-                support@qtkd.com
+              <p className="text-xs font-semibold text-[#111827]">Hỗ trợ kỹ thuật</p>
+              <p className="text-[10px] text-[#4B5563] truncate">
+                support@abclogistics.vn
               </p>
             </div>
-            <a
-              href="mailto:support@qtkd.com"
-              className="text-slate-400 hover:text-orange-600 transition-colors"
-            >
-              <Icon name="arrow" size={14} />
-            </a>
           </div>
 
-          <div className="flex items-center justify-between text-[11px] text-slate-400 px-1">
+          <div className="flex items-center justify-between text-[11px] text-[#9CA3AF] px-1">
             <span>ABC LOGISTICS</span>
-            <span className="font-mono text-[10px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-500">
-              v1.0.0
+            <span className="font-mono text-[10px] bg-white border border-[#E5E7EB] px-1.5 py-0.5 rounded text-[#4B5563]">
+              Sprint 01
             </span>
           </div>
         </div>
       </aside>
 
       {/* 2. MAIN APP CONTENT AREA */}
-      <div className="flex-1 flex flex-col min-w-0 lg:ml-64">
-        {/* STICKY TOPBAR: Minimalist, clean backdrop-blur */}
-        <header className="sticky top-0 z-30 h-16 bg-white/85 backdrop-blur-md border-b border-slate-200/80 px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
+      <div className="flex-1 flex flex-col min-w-0 lg:ml-60">
+        {/* STICKY TOPBAR: 64px height, Figma specs Section 3.1 & 3.2.1 */}
+        <header className="sticky top-0 z-30 h-16 bg-white border-b border-[#E5E7EB] px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
             <button
               type="button"
               onClick={() => setSidebarOpen(true)}
-              className="lg:hidden p-2 rounded-xl text-slate-600 hover:bg-slate-100 focus:outline-none"
+              className="lg:hidden p-2 rounded-lg text-[#4B5563] hover:bg-[#F3F4F6] focus:outline-none"
               aria-label="Mở Menu"
             >
               <Icon name="menu" size={20} />
             </button>
 
-            {/* Breadcrumbs */}
-            <div className="flex items-center gap-2 text-xs text-slate-400">
-              <span className="hidden sm:inline">Không gian làm việc</span>
-              <Icon name="chevron" size={12} />
-              <span className="font-bold text-slate-800 text-sm">{pageTitle}</span>
+            {/* Breadcrumbs matching Section 3.1: Trang chủ / Module / Màn hình */}
+            <div className="flex items-center gap-2 text-xs text-[#4B5563]">
+              <span
+                onClick={() => navigate("/")}
+                className="hover:text-[#2563EB] cursor-pointer hidden sm:inline"
+              >
+                Trang chủ
+              </span>
+              <Icon name="chevron" size={12} className="text-[#9CA3AF]" />
+              <span className="font-semibold text-[#111827] text-sm">{pageTitle}</span>
             </div>
           </div>
 
@@ -218,11 +264,11 @@ export default function AppShell() {
           <div className="flex items-center gap-3 sm:gap-4">
             {/* Quick Global Search */}
             <div className="relative">
-              <div className="hidden sm:flex items-center gap-2 w-56 md:w-64 h-9 px-3 rounded-xl bg-slate-100/80 hover:bg-slate-100 border border-slate-200/80 text-slate-400 text-xs transition-all focus-within:w-72 focus-within:bg-white focus-within:border-orange-500/50 focus-within:ring-2 focus-within:ring-orange-500/10">
-                <Icon name="search" size={16} />
+              <div className="hidden sm:flex items-center gap-2 w-56 md:w-64 h-9 px-3 rounded-lg bg-[#F3F4F6] border border-[#E5E7EB] text-[#4B5563] text-xs transition-all focus-within:w-72 focus-within:bg-white focus-within:border-[#2563EB] focus-within:ring-2 focus-within:ring-[#2563EB]/15">
+                <Icon name="search" size={16} className="text-[#9CA3AF]" />
                 <input
                   type="text"
-                  placeholder="Tìm kiếm phân hệ..."
+                  placeholder="Tìm kiếm phân hệ... (Ctrl + K)"
                   value={search}
                   onFocus={() => setSearchOpen(true)}
                   onChange={(e) => {
@@ -237,16 +283,16 @@ export default function AppShell() {
                       setSearchOpen(false);
                     }
                   }}
-                  className="w-full bg-transparent border-0 outline-none text-slate-800 placeholder-slate-400 text-xs"
+                  className="w-full bg-transparent border-0 outline-none text-[#111827] placeholder-[#9CA3AF] text-xs"
                 />
-                <kbd className="hidden md:inline-block px-1.5 py-0.5 text-[9px] font-mono text-slate-400 bg-white border border-slate-200 rounded">
+                <kbd className="hidden md:inline-block px-1.5 py-0.5 text-[9px] font-mono text-[#9CA3AF] bg-white border border-[#E5E7EB] rounded">
                   ESC
                 </kbd>
               </div>
 
               {/* Search dropdown results */}
               {searchOpen && search.trim() && (
-                <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-2xl shadow-xl border border-slate-200/80 p-2 z-40 space-y-1">
+                <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-xl shadow-lg border border-[#E5E7EB] p-2 z-40 space-y-1">
                   {searchResults.length > 0 ? (
                     searchResults.map((item) => (
                       <button
@@ -257,7 +303,7 @@ export default function AppShell() {
                           setSearch("");
                           setSearchOpen(false);
                         }}
-                        className="w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-orange-50 hover:text-orange-600 text-xs font-semibold text-slate-700 text-left transition-colors"
+                        className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-[#EFF6FF] hover:text-[#2563EB] text-xs font-medium text-[#111827] text-left transition-colors"
                       >
                         <div className="flex items-center gap-2.5">
                           <Icon
@@ -270,7 +316,7 @@ export default function AppShell() {
                       </button>
                     ))
                   ) : (
-                    <p className="p-3 text-xs text-slate-400 text-center">
+                    <p className="p-3 text-xs text-[#9CA3AF] text-center">
                       Không tìm thấy phân hệ nào
                     </p>
                   )}
@@ -278,39 +324,127 @@ export default function AppShell() {
               )}
             </div>
 
-            <div className="h-5 w-px bg-slate-200 hidden sm:block" />
+            {/* Notification Bell (Figma Section 3.1 & 4.9: Icon chuông + badge đỏ số chưa đọc vd "3") */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => {
+                  setNotificationsOpen(!notificationsOpen);
+                  setProfileOpen(false);
+                }}
+                className="relative p-2 rounded-lg text-[#4B5563] hover:text-[#111827] hover:bg-[#F3F4F6] transition-colors"
+                aria-label="Thông báo"
+                title="Thông báo hệ thống"
+              >
+                <Icon name="bell" size={20} />
+                {unreadCount > 0 && (
+                  <span className="absolute top-1 right-1 min-w-[18px] h-[18px] px-1 bg-[#DC2626] text-white text-[10px] font-bold rounded-full flex items-center justify-center leading-none border-2 border-white animate-pulse">
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
+
+              {notificationsOpen && (
+                <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-white rounded-xl shadow-xl border border-[#E5E7EB] z-50 overflow-hidden animate-fadeIn">
+                  <div className="p-3.5 border-b border-[#E5E7EB] flex items-center justify-between bg-[#F8FAFC]">
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-sm text-[#111827]">Thông báo</span>
+                      {unreadCount > 0 && (
+                        <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-[#DC2626] text-white">
+                          {unreadCount} mới
+                        </span>
+                      )}
+                    </div>
+                    {unreadCount > 0 && (
+                      <button
+                        type="button"
+                        onClick={markAllNotificationsAsRead}
+                        className="text-[11px] font-medium text-[#2563EB] hover:underline"
+                      >
+                        Đánh dấu đã đọc
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="divide-y divide-[#E5E7EB] max-h-80 overflow-y-auto">
+                    {notifications.length > 0 ? (
+                      notifications.map((n) => (
+                        <div
+                          key={n.id}
+                          onClick={() => {
+                            if (n.link) {
+                              navigate(n.link);
+                              setNotificationsOpen(false);
+                            }
+                          }}
+                          className={`p-3.5 hover:bg-[#F8FAFC] transition-colors cursor-pointer flex items-start gap-3 ${
+                            !n.read ? "bg-[#EFF6FF]/40" : ""
+                          }`}
+                        >
+                          <span
+                            className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${
+                              !n.read ? "bg-[#2563EB]" : "bg-transparent"
+                            }`}
+                          />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-semibold text-[#111827] truncate">
+                              {n.title}
+                            </p>
+                            <p className="text-[11px] text-[#4B5563] mt-0.5 line-clamp-2">
+                              {n.desc}
+                            </p>
+                            <span className="text-[10px] text-[#9CA3AF] mt-1 block">
+                              {n.time}
+                            </span>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="p-6 text-xs text-[#9CA3AF] text-center">
+                        Không có thông báo mới nào
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="h-5 w-px bg-[#E5E7EB] hidden sm:block" />
 
             {/* Profile Dropdown */}
             <div className="relative">
               <button
                 type="button"
-                onClick={() => setProfileOpen(!profileOpen)}
-                className="flex items-center gap-2.5 p-1.5 rounded-xl hover:bg-slate-100 transition-colors"
+                onClick={() => {
+                  setProfileOpen(!profileOpen);
+                  setNotificationsOpen(false);
+                }}
+                className="flex items-center gap-2.5 p-1 rounded-lg hover:bg-[#F3F4F6] transition-colors"
                 aria-expanded={profileOpen}
               >
-                <span className="w-8 h-8 rounded-full bg-gradient-to-tr from-orange-500 to-amber-400 text-white font-bold text-xs flex items-center justify-center shadow-sm">
+                <span className="w-8 h-8 rounded-full bg-[#1E3A8A] text-white font-bold text-xs flex items-center justify-center shadow-sm">
                   {initials}
                 </span>
                 <div className="hidden md:block text-left">
-                  <p className="text-xs font-bold text-slate-800 leading-tight">
+                  <p className="text-xs font-semibold text-[#111827] leading-tight">
                     {user.fullName}
                   </p>
-                  <p className="text-[10px] font-medium text-orange-600">
+                  <p className="text-[10px] font-medium text-[#2563EB]">
                     {roleLabels[role] ?? role}
                   </p>
                 </div>
-                <Icon name="down" size={14} />
+                <Icon name="down" size={14} className="text-[#9CA3AF]" />
               </button>
 
               {profileOpen && (
-                <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-slate-200/80 p-2 z-50 animate-fadeIn">
-                  <div className="p-3 border-b border-slate-100">
-                    <p className="text-xs font-bold text-slate-900 truncate">
+                <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-xl shadow-xl border border-[#E5E7EB] p-2 z-50 animate-fadeIn">
+                  <div className="p-3 border-b border-[#E5E7EB]">
+                    <p className="text-xs font-semibold text-[#111827] truncate">
                       {user.fullName}
                     </p>
-                    <p className="text-[11px] text-slate-500 truncate">{user.email}</p>
-                    <span className="inline-block mt-1 text-[10px] font-semibold text-orange-700 bg-orange-50 px-2 py-0.5 rounded-full border border-orange-200">
-                      {user.department?.name ?? "Quản trị hệ thống"}
+                    <p className="text-[11px] text-[#4B5563] truncate">{user.email}</p>
+                    <span className="inline-block mt-1 text-[10px] font-semibold text-[#1E3A8A] bg-[#EFF6FF] px-2 py-0.5 rounded border border-[#DBEAFE]">
+                      {user.department?.name ?? "Phòng Kinh doanh"}
                     </span>
                   </div>
 
@@ -321,15 +455,15 @@ export default function AppShell() {
                         navigate("/profile");
                         setProfileOpen(false);
                       }}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors text-left"
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-[#111827] hover:bg-[#F3F4F6] transition-colors text-left"
                     >
                       <Icon name="userCog" size={16} />
-                      <span>Hồ sơ cá nhân & Quyền</span>
+                      <span>Hồ sơ cá nhân &amp; Quyền</span>
                     </button>
                     <button
                       type="button"
                       onClick={logout}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-red-600 hover:bg-red-50 transition-colors text-left"
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium text-[#DC2626] hover:bg-rose-50 transition-colors text-left"
                     >
                       <Icon name="logout" size={16} />
                       <span>Đăng xuất hệ thống</span>
@@ -341,8 +475,8 @@ export default function AppShell() {
           </div>
         </header>
 
-        {/* 3. MAIN ROUTE VIEW */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
+        {/* 3. MAIN ROUTE VIEW - max-w-[1200px] as specified in Figma Section 2.3 */}
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-[1200px] w-full mx-auto">
           <Routes>
             <Route path="/" element={<Navigate to="/overview" replace />} />
             <Route
@@ -380,15 +514,6 @@ export default function AppShell() {
             <Route path="*" element={<Navigate to="/overview" replace />} />
           </Routes>
         </main>
-
-        {/* 4. FOOTER: Minimalist & Clean */}
-        <footer className="border-t border-slate-200/80 px-6 lg:px-8 py-5 text-xs text-slate-400 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <span>© 2026 QTKD ABC Logistics Solution. Nền tảng Doanh nghiệp Số.</span>
-          <span className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-emerald-500" />
-            Vận hành ổn định & An toàn dữ liệu
-          </span>
-        </footer>
       </div>
     </div>
   );
@@ -399,25 +524,17 @@ function ModulePlaceholder({
   description,
 }: {
   title: string;
-  description: string;
+  description?: string;
 }) {
   return (
-    <div className="max-w-2xl mx-auto py-12 text-center space-y-4">
-      <div className="w-16 h-16 rounded-2xl bg-orange-50 text-orange-600 flex items-center justify-center mx-auto shadow-sm">
-        <Icon name="activity" size={30} />
+    <div className="bg-white rounded-xl border border-[#E5E7EB] p-8 text-center shadow-sm">
+      <div className="w-12 h-12 rounded-lg bg-[#EFF6FF] text-[#2563EB] flex items-center justify-center mx-auto mb-4 font-bold text-lg">
+        {title.charAt(0)}
       </div>
-      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 text-slate-600 text-xs font-semibold">
-        <span className="w-2 h-2 rounded-full bg-orange-500" />
-        PHÂN HỆ NGHIỆP VỤ
-      </div>
-      <h2 className="text-2xl font-bold text-slate-900 tracking-tight">{title}</h2>
-      <p className="text-sm text-slate-500 max-w-md mx-auto leading-relaxed">
-        {description}
+      <h2 className="text-lg font-bold text-[#111827]">{title}</h2>
+      <p className="text-sm text-[#4B5563] max-w-md mx-auto mt-2">
+        {description || "Phân hệ đang trong lộ trình phát triển của Sprint tiếp theo."}
       </p>
-      <div className="p-4 rounded-xl bg-white border border-slate-200/80 text-xs text-slate-600 max-w-sm mx-auto shadow-sm">
-        Khung phân quyền RBAC và giao diện đã sẵn sàng kết nối API mở rộng trong
-        sprint tiếp theo.
-      </div>
     </div>
   );
 }

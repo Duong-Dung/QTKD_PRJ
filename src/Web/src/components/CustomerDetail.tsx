@@ -15,10 +15,15 @@ import {
   Receipt,
   RefreshCw,
   User,
+  Plus,
+  ExternalLink,
 } from 'lucide-react';
 import { CustomerDto, normalizeCustomerStatus } from '../types/customer';
 import { ApiError, customerService } from '../services/customerService';
+import { contractService } from '../services/contractService';
+import type { Contract } from '../types/contract';
 import { StatusBadge } from './StatusBadge';
+import { useNavigate } from 'react-router-dom';
 
 interface CustomerDetailProps {
   customer: CustomerDto;
@@ -47,16 +52,34 @@ function formatDateTime(value: string | null | undefined): string {
   }).format(date);
 }
 
+function formatDate(dateStr?: string) {
+  if (!dateStr) return '—';
+  const parts = dateStr.split('T')[0].split('-');
+  if (parts.length === 3) {
+    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+  }
+  return dateStr;
+}
+
+function formatCurrency(val: number, cur = 'VND') {
+  return new Intl.NumberFormat('vi-VN').format(val) + (cur === 'VND' ? ' đ' : ` ${cur}`);
+}
+
 export const CustomerDetail: React.FC<CustomerDetailProps> = ({
   customer: initialCustomer,
   onBack,
   onEdit,
   onToggleStatus,
 }) => {
+  const navigate = useNavigate();
   const [customer, setCustomer] = useState<CustomerDto>(initialCustomer);
   const [activeTab, setActiveTab] = useState<DetailTab>('overview');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [refreshError, setRefreshError] = useState<string | null>(null);
+
+  // Contracts associated with this customer (Figma Section 3.3.3)
+  const [customerContracts, setCustomerContracts] = useState<Contract[]>([]);
+  const [isLoadingContracts, setIsLoadingContracts] = useState(false);
 
   useEffect(() => {
     setCustomer(initialCustomer);
@@ -84,6 +107,34 @@ export const CustomerDetail: React.FC<CustomerDetailProps> = ({
 
     return () => controller.abort();
   }, [initialCustomer.id]);
+
+  // Load contracts when switching to contracts tab or when customer changes
+  useEffect(() => {
+    if (activeTab === 'contracts') {
+      setIsLoadingContracts(true);
+      contractService
+        .getContracts({ customerId: initialCustomer.id, pageSize: 50 })
+        .then((res) => {
+          if (res.items && res.items.length > 0) {
+            setCustomerContracts(res.items);
+          } else {
+            // Also attempt search by customer code or name if customerId didn't match
+            return contractService.getContracts({ searchTerm: initialCustomer.code, pageSize: 50 });
+          }
+        })
+        .then((fallbackRes) => {
+          if (fallbackRes?.items) {
+            setCustomerContracts(fallbackRes.items);
+          }
+        })
+        .catch((err) => {
+          console.warn('Không thể nạp danh sách hợp đồng theo khách hàng:', err);
+        })
+        .finally(() => {
+          setIsLoadingContracts(false);
+        });
+    }
+  }, [activeTab, initialCustomer.id, initialCustomer.code]);
 
   const status = normalizeCustomerStatus(customer.status, customer.statusName);
   const isSuspended = status === 'Suspended';
@@ -188,19 +239,25 @@ export const CustomerDetail: React.FC<CustomerDetailProps> = ({
                 key={tab.id}
                 type="button"
                 onClick={() => setActiveTab(tab.id)}
-                className={`py-3.5 text-sm font-semibold border-b-2 whitespace-nowrap transition-colors ${
+                className={`py-3.5 text-sm font-semibold border-b-2 whitespace-nowrap transition-colors flex items-center gap-2 ${
                   isActive
                     ? 'border-[#2563EB] text-[#2563EB]'
                     : 'border-transparent text-[#4B5563] hover:text-[#111827]'
                 }`}
               >
-                {tab.label}
+                <span>{tab.label}</span>
+                {tab.id === 'contracts' && customerContracts.length > 0 && (
+                  <span className="px-1.5 py-0.2 bg-[#EFF6FF] text-[#2563EB] text-[11px] rounded-full font-bold">
+                    {customerContracts.length}
+                  </span>
+                )}
               </button>
             );
           })}
         </div>
 
         <div className="p-6">
+          {/* Tab: Thông tin chung */}
           {activeTab === 'overview' && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
@@ -289,19 +346,103 @@ export const CustomerDetail: React.FC<CustomerDetailProps> = ({
             </div>
           )}
 
+          {/* Tab: Hợp đồng (Figma Section 3.3.3 & Yêu cầu 4.1) */}
           {activeTab === 'contracts' && (
-            <div className="py-10 text-center space-y-2">
-              <FileText className="w-8 h-8 text-[#9CA3AF] mx-auto" />
-              <p className="text-sm font-semibold text-[#111827]">
-                Danh sách hợp đồng theo khách hàng
-              </p>
-              <p className="text-xs text-[#4B5563] max-w-md mx-auto">
-                Dữ liệu hợp đồng của khách hàng sẽ hiển thị tự động sau khi API tìm kiếm hợp
-                đồng (TASK-31) được tích hợp vào nhánh develop.
-              </p>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-bold text-[#111827]">
+                    Hợp đồng đã ký kết &amp; đang xử lý
+                  </h3>
+                  <p className="text-xs text-[#4B5563]">
+                    Theo dõi toàn bộ hồ sơ hợp đồng dịch vụ logistics liên kết với {customer.name}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => navigate('/contracts')}
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#2563EB] hover:bg-blue-700 text-xs font-semibold text-white shadow-sm transition-colors"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Tạo hợp đồng mới</span>
+                </button>
+              </div>
+
+              {isLoadingContracts ? (
+                <div className="py-8 text-center text-xs text-[#9CA3AF]">
+                  <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-[#2563EB]" />
+                  <span>Đang tải danh sách hợp đồng...</span>
+                </div>
+              ) : customerContracts.length > 0 ? (
+                <div className="border border-[#E5E7EB] rounded-lg overflow-hidden">
+                  <table className="w-full text-left text-xs border-collapse">
+                    <thead>
+                      <tr className="bg-[#1E3A8A] text-white font-semibold">
+                        <th className="py-2.5 px-3">Mã HĐ</th>
+                        <th className="py-2.5 px-3">Tên hợp đồng</th>
+                        <th className="py-2.5 px-3">Thời hạn hiệu lực</th>
+                        <th className="py-2.5 px-3 text-right">Giá trị</th>
+                        <th className="py-2.5 px-3 text-center">Trạng thái</th>
+                        <th className="py-2.5 px-3 text-right">Thao tác</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#E5E7EB]">
+                      {customerContracts.map((c) => (
+                        <tr key={c.id} className="hover:bg-[#EFF6FF] transition-colors">
+                          <td className="py-2.5 px-3 font-mono font-semibold text-[#2563EB]">
+                            {c.code}
+                          </td>
+                          <td className="py-2.5 px-3 font-medium text-[#111827] max-w-[200px] truncate">
+                            {c.title || 'Hợp đồng dịch vụ logistics'}
+                          </td>
+                          <td className="py-2.5 px-3 text-[#4B5563] whitespace-nowrap">
+                            {formatDate(c.effectiveFrom)} – {formatDate(c.effectiveTo)}
+                          </td>
+                          <td className="py-2.5 px-3 text-right font-medium text-[#111827] whitespace-nowrap">
+                            {formatCurrency(c.contractValue, c.currency)}
+                          </td>
+                          <td className="py-2.5 px-3 text-center whitespace-nowrap">
+                            <StatusBadge status={c.status} />
+                          </td>
+                          <td className="py-2.5 px-3 text-right whitespace-nowrap">
+                            <button
+                              type="button"
+                              onClick={() => navigate('/contracts')}
+                              className="inline-flex items-center gap-1 text-xs font-semibold text-[#2563EB] hover:underline"
+                            >
+                              <span>Chi tiết</span>
+                              <ExternalLink className="w-3 h-3" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="py-10 text-center space-y-2 border border-dashed border-[#E5E7EB] rounded-lg">
+                  <FileText className="w-8 h-8 text-[#9CA3AF] mx-auto" />
+                  <p className="text-sm font-semibold text-[#111827]">
+                    Chưa có hợp đồng nào với khách hàng này
+                  </p>
+                  <p className="text-xs text-[#4B5563] max-w-sm mx-auto">
+                    Bạn có thể khởi tạo hợp đồng dịch vụ logistics mới ngay bây giờ.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => navigate('/contracts')}
+                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-[#2563EB] text-white text-xs font-semibold hover:bg-blue-700 transition-colors mt-2"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Tạo hợp đồng ngay</span>
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
+          {/* Tab: Bảng giá */}
           {activeTab === 'pricing' && (
             <div className="py-10 text-center space-y-2">
               <Receipt className="w-8 h-8 text-[#9CA3AF] mx-auto" />
@@ -312,6 +453,7 @@ export const CustomerDetail: React.FC<CustomerDetailProps> = ({
             </div>
           )}
 
+          {/* Tab: Bảng thanh toán */}
           {activeTab === 'payments' && (
             <div className="py-10 text-center space-y-2">
               <CreditCard className="w-8 h-8 text-[#9CA3AF] mx-auto" />
@@ -322,6 +464,7 @@ export const CustomerDetail: React.FC<CustomerDetailProps> = ({
             </div>
           )}
 
+          {/* Tab: Lịch sử */}
           {activeTab === 'history' && (
             <div className="space-y-3 text-sm">
               <div className="flex items-start gap-3 p-3.5 rounded-lg bg-[#F3F4F6]/70 border border-[#E5E7EB]">

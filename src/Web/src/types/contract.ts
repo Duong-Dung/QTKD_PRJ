@@ -1,4 +1,15 @@
-export type ContractStatus = 'Draft' | 'PendingApproval' | 'Approved' | 'RevisionRequested';
+export type ContractStatus =
+  | 'Draft'
+  | 'Submitted'
+  | 'UnderReview'
+  | 'PendingApproval'
+  | 'RevisionRequested'
+  | 'Approved'
+  | 'Active'
+  | 'Rejected'
+  | 'Cancelled'
+  | 'Expired'
+  | 'Superseded';
 
 export interface Customer {
   id: string;
@@ -23,6 +34,7 @@ export interface Contract {
   id: string;
   code: string;
   title: string;
+  contractType?: string;
   customerId: string;
   customerName: string;
   customerTaxCode: string;
@@ -31,12 +43,14 @@ export interface Contract {
   contractValue: number;
   currency: string;
   paymentTerms: string;
+  paymentTermDays?: number | string;
+  paymentCycle?: string;
   serviceTerms: string;
   status: ContractStatus;
   ownerName: string;
   ownerId?: string;
+  currentAssignee?: string;
   attachments: Attachment[];
   createdAt: string;
   updatedAt?: string;
 }
-

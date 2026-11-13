@@ -22,10 +22,10 @@ const moduleConfig: Record<
   },
   contracts: {
     tag: "PHÁP LÝ & HỢP ĐỒNG",
-    badgeColor: "bg-orange-50 text-orange-700 border-orange-200",
-    accentClass: "group-hover:border-orange-500/40",
-    iconBg: "bg-orange-50",
-    iconColor: "text-orange-600",
+    badgeColor: "bg-blue-50 text-[#2563EB] border-blue-200",
+    accentClass: "group-hover:border-blue-500/40",
+    iconBg: "bg-blue-50",
+    iconColor: "text-[#2563EB]",
   },
   pricing: {
     tag: "CƯỚC PHÍ & PHỤ PHÍ",
@@ -91,35 +91,35 @@ export default function DashboardPage({
 
   return (
     <div className="space-y-8 animate-fadeIn">
-      {/* 1. HERO SECTION: Impressive, Minimalist, Modern, High Contrast */}
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0B192C] via-[#0F172A] to-[#1E293B] text-white p-8 sm:p-10 lg:p-12 shadow-2xl border border-slate-800">
-        {/* Subtle decorative background glow and mesh */}
+      {/* 1. HERO SECTION: Impressive, Minimalist, High Contrast Navy `#1E3A8A` / Royal Blue `#2563EB` */}
+      <section className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#1E3A8A] via-[#172554] to-[#0F172A] text-white p-8 sm:p-10 lg:p-12 shadow-xl border border-blue-900/50">
+        {/* Subtle decorative background glow */}
         <div
-          className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-orange-500/15 blur-3xl pointer-events-none"
+          className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-blue-500/20 blur-3xl pointer-events-none"
           aria-hidden="true"
         />
         <div
-          className="absolute -bottom-20 -left-20 w-80 h-80 rounded-full bg-blue-500/10 blur-3xl pointer-events-none"
+          className="absolute -bottom-20 -left-20 w-80 h-80 rounded-full bg-cyan-500/15 blur-3xl pointer-events-none"
           aria-hidden="true"
         />
 
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8">
           <div className="max-w-2xl space-y-4">
-            <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/10 text-xs font-semibold text-orange-300 tracking-wide">
+            <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-xs font-semibold text-blue-200 tracking-wide">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>QTKD ABC LOGISTICS 4.0</span>
+              <span>ABC LOGISTICS • HỆ THỐNG QTKD 4.0</span>
               <span className="text-white/40">•</span>
-              <span className="text-slate-300 font-normal">{currentDateFormatted}</span>
+              <span className="text-blue-100 font-normal">{currentDateFormatted}</span>
             </div>
 
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white leading-tight">
               Chào buổi sáng, {firstName}!
             </h1>
 
-            <p className="text-slate-300 text-sm sm:text-base leading-relaxed max-w-xl">
+            <p className="text-blue-100/90 text-sm sm:text-base leading-relaxed max-w-xl">
               Nền tảng quản trị kinh doanh và chuỗi cung ứng tập trung. Mọi quy trình từ
-              hồ sơ khách hàng, hợp đồng pháp lý đến phê duyệt đa cấp đều được tối ưu hóa
-              tinh gọn và chuẩn xác.
+              hồ sơ khách hàng, hợp đồng pháp lý đến phê duyệt đa cấp đều được vận hành
+              tinh gọn, minh bạch và chuẩn xác theo chuẩn Figma Design Pack.
             </p>
 
             {/* Primary & Secondary Call to Actions */}
@@ -127,7 +127,7 @@ export default function DashboardPage({
               <button
                 type="button"
                 onClick={() => navigate("/contracts")}
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-semibold text-sm shadow-lg shadow-orange-600/30 hover:shadow-orange-600/40 hover:-translate-y-0.5 transition-all duration-200"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#2563EB] hover:bg-blue-500 text-white font-semibold text-sm shadow-lg shadow-blue-600/30 hover:-translate-y-0.5 transition-all duration-200"
               >
                 <span>+ Lập Hợp đồng mới</span>
                 <Icon name="arrow" size={16} />
@@ -136,46 +136,37 @@ export default function DashboardPage({
               <button
                 type="button"
                 onClick={() => navigate("/customers")}
-                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-medium text-sm backdrop-blur-md border border-white/15 hover:-translate-y-0.5 transition-all duration-200"
+                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white font-medium text-sm backdrop-blur-md border border-white/20 hover:-translate-y-0.5 transition-all duration-200"
               >
                 <Icon name="users" size={16} />
                 <span>Quản lý Khách hàng</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => navigate("/overview")}
-                className="inline-flex items-center gap-1.5 px-4 py-3 rounded-xl text-slate-300 hover:text-white font-medium text-sm hover:underline transition-colors"
-              >
-                <span>Xem nhanh chỉ số SLA</span>
-                <Icon name="chevron" size={14} />
               </button>
             </div>
           </div>
 
           {/* Key Metric Highlights on Hero Card */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-1 gap-3.5 shrink-0">
-            <div className="p-4 rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 transition-colors">
+            <div className="p-4 rounded-xl bg-white/10 backdrop-blur-md border border-white/15 hover:bg-white/15 transition-colors">
               <span className="block text-2xl font-bold text-white tracking-tight">
                 99.4%
               </span>
-              <span className="text-xs text-slate-400 font-medium">
+              <span className="text-xs text-blue-200 font-medium">
                 Tỷ lệ tuân thủ SLA
               </span>
             </div>
-            <div className="p-4 rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 transition-colors">
-              <span className="block text-2xl font-bold text-orange-400 tracking-tight">
+            <div className="p-4 rounded-xl bg-white/10 backdrop-blur-md border border-white/15 hover:bg-white/15 transition-colors">
+              <span className="block text-2xl font-bold text-cyan-300 tracking-tight">
                 2.4h
               </span>
-              <span className="text-xs text-slate-400 font-medium">
+              <span className="text-xs text-blue-200 font-medium">
                 Thời gian duyệt TB
               </span>
             </div>
-            <div className="p-4 rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 transition-colors col-span-2 sm:col-span-1">
+            <div className="p-4 rounded-xl bg-white/10 backdrop-blur-md border border-white/15 hover:bg-white/15 transition-colors col-span-2 sm:col-span-1">
               <span className="block text-2xl font-bold text-emerald-400 tracking-tight">
                 100%
               </span>
-              <span className="text-xs text-slate-400 font-medium">
+              <span className="text-xs text-blue-200 font-medium">
                 Bảo đảm số hóa RBAC
               </span>
             </div>
@@ -185,91 +176,91 @@ export default function DashboardPage({
 
       {/* 2. STATS OVERVIEW CARDS: Clean Grid with Soft Hover Effects */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-200">
+        <div className="bg-white rounded-xl border border-[#E5E7EB] p-5 shadow-sm hover:border-[#DBEAFE] hover:-translate-y-0.5 transition-all duration-200">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <span className="text-xs font-semibold text-[#4B5563] uppercase tracking-wider">
               Khách hàng đối tác
             </span>
-            <span className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+            <span className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
               <Icon name="users" size={20} />
             </span>
           </div>
           <div className="mt-4 flex items-baseline justify-between">
-            <span className="text-3xl font-extrabold text-slate-900 tracking-tight">
+            <span className="text-3xl font-extrabold text-[#111827] tracking-tight">
               86
             </span>
-            <span className="inline-flex items-center text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+            <span className="inline-flex items-center text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
               +4 tháng này
             </span>
           </div>
-          <p className="mt-2 text-xs text-slate-500">
-            Doanh nghiệp logistics & kho bãi
+          <p className="mt-2 text-xs text-[#4B5563]">
+            Doanh nghiệp logistics &amp; kho bãi
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-200">
+        <div className="bg-white rounded-xl border border-[#E5E7EB] p-5 shadow-sm hover:border-[#DBEAFE] hover:-translate-y-0.5 transition-all duration-200">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <span className="text-xs font-semibold text-[#4B5563] uppercase tracking-wider">
               Hợp đồng đang thực hiện
             </span>
-            <span className="w-10 h-10 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center">
+            <span className="w-10 h-10 rounded-lg bg-blue-50 text-[#2563EB] flex items-center justify-center">
               <Icon name="file" size={20} />
             </span>
           </div>
           <div className="mt-4 flex items-baseline justify-between">
-            <span className="text-3xl font-extrabold text-slate-900 tracking-tight">
+            <span className="text-3xl font-extrabold text-[#111827] tracking-tight">
               142
             </span>
-            <span className="inline-flex items-center text-xs font-semibold text-orange-700 bg-orange-50 px-2.5 py-1 rounded-full border border-orange-200">
+            <span className="inline-flex items-center text-xs font-semibold text-[#2563EB] bg-[#EFF6FF] px-2 py-0.5 rounded border border-[#DBEAFE]">
               +12.5%
             </span>
           </div>
-          <p className="mt-2 text-xs text-slate-500">
-            Số hóa điện tử & lưu trữ an toàn
+          <p className="mt-2 text-xs text-[#4B5563]">
+            Số hóa điện tử &amp; lưu trữ an toàn
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-200">
+        <div className="bg-white rounded-xl border border-[#E5E7EB] p-5 shadow-sm hover:border-[#DBEAFE] hover:-translate-y-0.5 transition-all duration-200">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <span className="text-xs font-semibold text-[#4B5563] uppercase tracking-wider">
               Giá trị cam kết
             </span>
-            <span className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+            <span className="w-10 h-10 rounded-lg bg-blue-50 text-[#1E3A8A] flex items-center justify-center">
               <Icon name="activity" size={20} />
             </span>
           </div>
           <div className="mt-4 flex items-baseline justify-between">
-            <span className="text-3xl font-extrabold text-slate-900 tracking-tight">
+            <span className="text-3xl font-extrabold text-[#1E3A8A] tracking-tight">
               48.5 Tỷ
             </span>
-            <span className="inline-flex items-center text-xs font-semibold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-full border border-blue-200">
+            <span className="inline-flex items-center text-xs font-semibold text-[#1E3A8A] bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
               VND
             </span>
           </div>
-          <p className="mt-2 text-xs text-slate-500">
+          <p className="mt-2 text-xs text-[#4B5563]">
             Tổng giá trị hợp đồng lũy kế 2026
           </p>
         </div>
 
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all duration-200">
+        <div className="bg-white rounded-xl border border-[#E5E7EB] p-5 shadow-sm hover:border-[#DBEAFE] hover:-translate-y-0.5 transition-all duration-200">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <span className="text-xs font-semibold text-[#4B5563] uppercase tracking-wider">
               Hồ sơ chờ phê duyệt
             </span>
-            <span className="w-10 h-10 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center">
+            <span className="w-10 h-10 rounded-lg bg-amber-50 text-[#D97706] flex items-center justify-center">
               <Icon name="check" size={20} />
             </span>
           </div>
           <div className="mt-4 flex items-baseline justify-between">
-            <span className="text-3xl font-extrabold text-slate-900 tracking-tight">
-              7
+            <span className="text-3xl font-extrabold text-[#D97706] tracking-tight">
+              07
             </span>
-            <span className="inline-flex items-center text-xs font-semibold text-violet-700 bg-violet-50 px-2.5 py-1 rounded-full border border-violet-200">
+            <span className="inline-flex items-center text-xs font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
               Cần xử lý
             </span>
           </div>
-          <p className="mt-2 text-xs text-slate-500">
-            Quy trình Pháp chế & Ban Giám đốc
+          <p className="mt-2 text-xs text-[#4B5563]">
+            Quy trình Pháp chế &amp; Ban Giám đốc
           </p>
         </div>
       </section>
@@ -278,18 +269,18 @@ export default function DashboardPage({
       <section className="space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
           <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-orange-600">
+            <span className="text-xs font-bold uppercase tracking-wider text-[#2563EB]">
               KHÔNG GIAN LÀM VIỆC
             </span>
-            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight mt-1">
+            <h2 className="text-xl sm:text-2xl font-bold text-[#111827] tracking-tight mt-1">
               Phân hệ Chức năng
             </h2>
-            <p className="text-xs sm:text-sm text-slate-500">
+            <p className="text-xs sm:text-sm text-[#4B5563]">
               Truy cập nhanh các phân hệ nghiệp vụ theo vai trò và quyền hạn được cấp.
             </p>
           </div>
-          <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200 w-fit">
-            <strong className="text-slate-800">{modules.length}</strong> phân hệ khả dụng
+          <span className="text-xs font-semibold text-[#4B5563] bg-white px-3 py-1.5 rounded-lg border border-[#E5E7EB] w-fit">
+            <strong className="text-[#111827]">{modules.length}</strong> phân hệ khả dụng
           </span>
         </div>
 
@@ -298,7 +289,7 @@ export default function DashboardPage({
             const config = moduleConfig[item.id] ?? {
               tag: "NGHIỆP VỤ",
               badgeColor: "bg-slate-100 text-slate-700 border-slate-200",
-              accentClass: "group-hover:border-slate-400",
+              accentClass: "group-hover:border-[#2563EB]/40",
               iconBg: "bg-slate-100",
               iconColor: "text-slate-600",
             };
@@ -307,37 +298,37 @@ export default function DashboardPage({
               <Link
                 key={item.id}
                 to={`/${item.id}`}
-                className={`group relative flex flex-col justify-between p-6 bg-white rounded-2xl border border-slate-200/80 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 ${config.accentClass}`}
+                className={`group relative flex flex-col justify-between p-6 bg-white rounded-xl border border-[#E5E7EB] shadow-sm hover:shadow-lg hover:border-[#2563EB]/50 hover:-translate-y-1 transition-all duration-200 ${config.accentClass}`}
               >
                 <div>
                   <div className="flex items-center justify-between gap-3">
                     <span
-                      className={`w-12 h-12 rounded-xl ${config.iconBg} ${config.iconColor} flex items-center justify-center transition-transform group-hover:scale-110 duration-200`}
+                      className={`w-11 h-11 rounded-lg ${config.iconBg} ${config.iconColor} flex items-center justify-center transition-transform group-hover:scale-105 duration-200`}
                     >
                       <Icon
                         name={item.icon as Parameters<typeof Icon>[0]["name"]}
-                        size={22}
+                        size={20}
                       />
                     </span>
                     <span
-                      className={`text-[10px] font-bold px-2.5 py-1 rounded-md border tracking-wider ${config.badgeColor}`}
+                      className={`text-[10px] font-bold px-2 py-0.5 rounded border tracking-wider ${config.badgeColor}`}
                     >
                       {config.tag}
                     </span>
                   </div>
 
-                  <h3 className="mt-5 text-base font-bold text-slate-900 group-hover:text-orange-600 transition-colors">
+                  <h3 className="mt-4 text-base font-bold text-[#111827] group-hover:text-[#2563EB] transition-colors">
                     {item.label}
                   </h3>
-                  <p className="mt-2 text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                  <p className="mt-1.5 text-xs text-[#4B5563] line-clamp-2 leading-relaxed">
                     {item.description}
                   </p>
                 </div>
 
-                <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-slate-600 group-hover:text-orange-600 transition-colors">
+                <div className="mt-5 pt-3.5 border-t border-[#E5E7EB] flex items-center justify-between text-xs font-semibold text-[#4B5563] group-hover:text-[#2563EB] transition-colors">
                   <span>Mở phân hệ</span>
                   <span className="transform group-hover:translate-x-1 transition-transform">
-                    <Icon name="arrow" size={15} />
+                    <Icon name="arrow" size={14} />
                   </span>
                 </div>
               </Link>
@@ -346,151 +337,139 @@ export default function DashboardPage({
         </div>
       </section>
 
-      {/* 4. WORKFLOW STATUS & SECURITY OVERVIEW: Split Section */}
+      {/* 4. WORKFLOW STATUS & SECURITY OVERVIEW */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left: Pending Workflow highlights */}
-        <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm space-y-4">
+        <div className="lg:col-span-2 bg-white rounded-xl border border-[#E5E7EB] p-6 shadow-sm space-y-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-base font-bold text-slate-900">
-                Quy trình & Hợp đồng cần lưu ý
+              <h3 className="text-base font-bold text-[#111827]">
+                Hồ sơ hợp đồng cần lưu ý
               </h3>
-              <p className="text-xs text-slate-500">
-                Các hồ sơ đang trong vòng đời phê duyệt đa cấp
+              <p className="text-xs text-[#4B5563]">
+                Các hợp đồng đang trong quy trình rà soát và phê duyệt đa cấp
               </p>
             </div>
             <button
               type="button"
               onClick={() => navigate("/contracts")}
-              className="text-xs font-semibold text-orange-600 hover:text-orange-700 hover:underline"
+              className="text-xs font-semibold text-[#2563EB] hover:underline"
             >
               Xem tất cả →
             </button>
           </div>
 
-          <div className="divide-y divide-slate-100">
-            <div className="py-3.5 flex items-center justify-between gap-4">
+          <div className="divide-y divide-[#E5E7EB]">
+            <div className="py-3 flex items-center justify-between gap-4 hover:bg-[#F8FAFC] rounded-lg px-2 transition-colors cursor-pointer" onClick={() => navigate("/contracts")}>
               <div className="flex items-center gap-3 min-w-0">
-                <span className="w-9 h-9 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center font-bold text-xs shrink-0">
+                <span className="w-8 h-8 rounded-lg bg-blue-50 text-[#2563EB] flex items-center justify-center font-bold text-xs shrink-0">
                   HĐ
                 </span>
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-slate-900 truncate">
+                  <p className="text-xs font-semibold text-[#111827] truncate">
                     HĐ-2026-001 — Vận chuyển Container Cát Lái - Đà Nẵng
                   </p>
-                  <p className="text-xs text-slate-500 truncate">
+                  <p className="text-[11px] text-[#4B5563] truncate">
                     Công ty Cổ phần Vận tải Biển Đông • 1,250,000,000 VND
                   </p>
                 </div>
               </div>
-              <span className="shrink-0 text-xs font-semibold px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
-                Chờ Pháp chế
+              <span className="shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded bg-cyan-50 text-[#0891B2] border border-cyan-200">
+                Đang rà soát (Pháp chế)
               </span>
             </div>
 
-            <div className="py-3.5 flex items-center justify-between gap-4">
+            <div className="py-3 flex items-center justify-between gap-4 hover:bg-[#F8FAFC] rounded-lg px-2 transition-colors cursor-pointer" onClick={() => navigate("/contracts")}>
               <div className="flex items-center gap-3 min-w-0">
-                <span className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-xs shrink-0">
+                <span className="w-8 h-8 rounded-lg bg-emerald-50 text-[#16A34A] flex items-center justify-center font-bold text-xs shrink-0">
                   HĐ
                 </span>
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-slate-900 truncate">
-                    HĐ-2026-002 — Kho bãi ICD Long Bình & Dịch vụ Khai thác
+                  <p className="text-xs font-semibold text-[#111827] truncate">
+                    HĐ-2026-002 — Kho bãi ICD Long Bình &amp; Dịch vụ Khai thác
                   </p>
-                  <p className="text-xs text-slate-500 truncate">
+                  <p className="text-[11px] text-[#4B5563] truncate">
                     Công ty TNHH Logistics Nam Á • 850,000,000 VND
                   </p>
                 </div>
               </div>
-              <span className="shrink-0 text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+              <span className="shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded bg-emerald-50 text-[#16A34A] border border-emerald-200">
                 Đã phê duyệt
               </span>
             </div>
 
-            <div className="py-3.5 flex items-center justify-between gap-4">
+            <div className="py-3 flex items-center justify-between gap-4 hover:bg-[#F8FAFC] rounded-lg px-2 transition-colors cursor-pointer" onClick={() => navigate("/contracts")}>
               <div className="flex items-center gap-3 min-w-0">
-                <span className="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-xs shrink-0">
+                <span className="w-8 h-8 rounded-lg bg-blue-50 text-[#1E3A8A] flex items-center justify-center font-bold text-xs shrink-0">
                   HĐ
                 </span>
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-slate-900 truncate">
+                  <p className="text-xs font-semibold text-[#111827] truncate">
                     HĐ-2026-003 — Dịch vụ Logistics Hải Quan Trọn gói
                   </p>
-                  <p className="text-xs text-slate-500 truncate">
+                  <p className="text-[11px] text-[#4B5563] truncate">
                     Tập đoàn Thủy sản Minh Phú • 2,100,000,000 VND
                   </p>
                 </div>
               </div>
-              <span className="shrink-0 text-xs font-semibold px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
-                Chờ Giám đốc
+              <span className="shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded bg-blue-50 text-[#2563EB] border border-blue-200">
+                Chờ duyệt (TGĐ)
               </span>
             </div>
           </div>
         </div>
 
         {/* Right: Security & Role Information Card */}
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-sm flex flex-col justify-between space-y-5">
+        <div className="bg-white rounded-xl border border-[#E5E7EB] p-6 shadow-sm flex flex-col justify-between space-y-5">
           <div>
             <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                TÀI KHOẢN ĐANG HOẠT ĐỘNG
+              <span className="text-xs font-bold uppercase tracking-wider text-[#4B5563]">
+                TÀI KHOẢN ĐANG ĐĂNG NHẬP
               </span>
-              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                Đang trực tuyến
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#16A34A] bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#16A34A] animate-pulse" />
+                Trực tuyến
               </span>
             </div>
 
             <div className="mt-4 flex items-center gap-3.5">
-              <span className="w-12 h-12 rounded-xl bg-gradient-to-tr from-orange-500 to-amber-400 text-white font-bold flex items-center justify-center text-lg shadow-md shadow-orange-500/20">
+              <span className="w-11 h-11 rounded-lg bg-[#1E3A8A] text-white font-bold flex items-center justify-center text-base shadow-sm">
                 {user.fullName
                   .split(" ")
                   .slice(-2)
                   .map((p) => p[0])
-                  .join("")
-                  .toUpperCase()}
+                  .join("")}
               </span>
               <div className="min-w-0">
-                <h4 className="text-sm font-bold text-slate-900 truncate">
+                <p className="text-sm font-bold text-[#111827] truncate">
                   {user.fullName}
-                </h4>
-                <p className="text-xs text-slate-500 truncate">{user.email}</p>
-                <p className="text-[11px] font-semibold text-orange-600 mt-0.5">
-                  {user.department?.name ?? "Quản trị hệ thống"}
                 </p>
+                <p className="text-xs text-[#4B5563] truncate">{user.email}</p>
+              </div>
+            </div>
+
+            <div className="mt-4 p-3 rounded-lg bg-[#F8FAFC] border border-[#E5E7EB] text-xs space-y-1.5">
+              <div className="flex items-center justify-between">
+                <span className="text-[#4B5563]">Đơn vị phòng ban:</span>
+                <span className="font-semibold text-[#1E3A8A]">
+                  {user.department?.name ?? "Phòng Kinh doanh"}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-[#4B5563]">Vai trò hệ thống:</span>
+                <span className="font-semibold text-[#2563EB]">
+                  {user.roles.join(", ")}
+                </span>
               </div>
             </div>
           </div>
 
-          <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-slate-500">Vai trò RBAC:</span>
-              <span className="font-bold text-slate-800">
-                {user.roles.join(", ")}
-              </span>
-            </div>
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-slate-500">Mã phòng ban:</span>
-              <span className="font-bold text-slate-800">
-                {user.department?.code ?? "QT"}
-              </span>
-            </div>
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-slate-500">Bảo mật:</span>
-              <span className="font-semibold text-emerald-600 flex items-center gap-1">
-                <Icon name="lock" size={13} />
-                JWT RSA Token
-              </span>
-            </div>
+          <div className="pt-3 border-t border-[#E5E7EB] flex items-center justify-between text-xs">
+            <span className="text-[#9CA3AF]">Bảo mật phiên làm việc:</span>
+            <span className="font-medium text-[#16A34A] flex items-center gap-1">
+              <span>●</span> JWT Token Active
+            </span>
           </div>
-
-          <button
-            type="button"
-            onClick={() => navigate("/profile")}
-            className="w-full py-2.5 px-4 rounded-xl border border-slate-200 hover:border-orange-500/50 hover:bg-orange-50 text-slate-700 hover:text-orange-600 text-xs font-semibold transition-all text-center"
-          >
-            Xem chi tiết Hồ sơ & Quyền hạn →
-          </button>
         </div>
       </section>
     </div>

@@ -335,9 +335,6 @@ export const CustomerWorkspace: React.FC<CustomerWorkspaceProps> = ({
           <h1 className="text-[22px] leading-[30px] font-semibold text-[#111827]">
             Khách hàng
           </h1>
-          <p className="text-sm text-[#4B5563] mt-0.5">
-            Tra cứu, cập nhật hồ sơ và quản lý trạng thái hợp tác của khách hàng doanh nghiệp.
-          </p>
         </div>
 
         <button
@@ -485,13 +482,13 @@ export const CustomerWorkspace: React.FC<CustomerWorkspaceProps> = ({
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="bg-slate-50 border-b border-[#E5E7EB] text-xs font-semibold text-[#1E3A8A] uppercase tracking-wider">
-                    <th className="py-3.5 px-4">Mã KH</th>
-                    <th className="py-3.5 px-4">Tên khách hàng</th>
-                    <th className="py-3.5 px-4">MST</th>
-                    <th className="py-3.5 px-4">Người đại diện</th>
-                    <th className="py-3.5 px-4">Trạng thái</th>
-                    <th className="py-3.5 px-4 text-right w-20">Hành động</th>
+                  <tr className="bg-[#1E3A8A] text-white text-[11px] uppercase tracking-wider font-semibold">
+                    <th className="py-3 px-4">Mã KH</th>
+                    <th className="py-3 px-4">Tên khách hàng</th>
+                    <th className="py-3 px-4">MST</th>
+                    <th className="py-3 px-4">Người đại diện</th>
+                    <th className="py-3 px-4">Trạng thái</th>
+                    <th className="py-3 px-4 text-right w-20">Hành động</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#E5E7EB] text-sm">

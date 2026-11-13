@@ -46,17 +46,17 @@ export default function LoginPage() {
     <main className="login-page">
       <section className="login-visual">
         <div className="login-visual__top">
-          <a className="brand brand--light" href="/login" aria-label="QTKD Logistics">
-            <span className="brand-mark">Q</span>
-            <span className="brand-name">QTKD<span>LOGISTICS</span></span>
+          <a className="brand brand--light" href="/login" aria-label="ABC Logistics">
+            <span className="brand-mark">ABC</span>
+            <span className="brand-name">ABC LOGISTICS<span>HỆ THỐNG QUẢN TRỊ KINH DOANH</span></span>
           </a>
-          <span className="visual-tag"><span className="status-dot" /> NỀN TẢNG QUẢN TRỊ DOANH NGHIỆP</span>
+          <span className="visual-tag"><span className="status-dot" /> NỀN TẢNG DOANH NGHIỆP 4.0</span>
         </div>
 
         <div className="visual-copy">
-          <span className="eyebrow eyebrow--light">VẬN HÀNH TINH GỌN · TĂNG TRƯỞNG BỀN VỮNG</span>
-          <h1>Mọi chuyển động<br />trong tầm kiểm soát.</h1>
-          <p>Không gian quản trị tập trung cho hoạt động kinh doanh và vận hành logistics của bạn.</p>
+          <span className="eyebrow eyebrow--light">VẬN HÀNH TINH GỌN · PHÊ DUYỆT ĐA CẤP</span>
+          <h1>Quản trị hợp đồng &amp;<br />chuỗi cung ứng cảng biển.</h1>
+          <p>Không gian quản trị tập trung toàn diện cho hoạt động kinh doanh, khách hàng, hợp đồng và dịch vụ logistics của ABC Logistics.</p>
         </div>
 
         <div className="visual-art" aria-hidden="true">
@@ -65,33 +65,33 @@ export default function LoginPage() {
           <div className="art-orbit art-orbit--two" />
           <div className="art-route"><i /><i /><i /><i /></div>
           <div className="art-card art-card--main">
-            <div className="art-card__top"><span className="art-icon">↗</span><span className="art-label">QUY TRÌNH VẬN HÀNH</span><span className="art-live">CORE</span></div>
-            <div className="art-number">Một<span> hệ thống</span></div>
-            <div className="art-caption">Liền mạch từ kinh doanh đến vận hành.</div>
+            <div className="art-card__top"><span className="art-icon">⚓</span><span className="art-label">QUY TRÌNH HỢP ĐỒNG LOGISTICS</span><span className="art-live">ACTIVE</span></div>
+            <div className="art-number">ABC<span> Logistics</span></div>
+            <div className="art-caption">Liền mạch từ kinh doanh, rà soát pháp chế đến ký duyệt.</div>
             <div className="art-bars"><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /><i /></div>
-            <div className="art-card__bottom"><span>KẾT NỐI QUY TRÌNH</span><strong>QTKD WORKSPACE</strong></div>
+            <div className="art-card__bottom"><span>KẾT NỐI VẬN HÀNH</span><strong>QTKD WORKSPACE</strong></div>
           </div>
-          <div className="art-card art-card--float"><span className="float-icon">✳</span><div><strong>Một không gian</strong><small>Kinh doanh · vận hành</small></div><span className="float-check">✓</span></div>
-          <div className="art-annotation"><span /> KẾT NỐI MỌI QUY TRÌNH</div>
+          <div className="art-card art-card--float"><span className="float-icon">🚢</span><div><strong>Cảng &amp; Kho ICD</strong><small>Dịch vụ · Khai thác cảng</small></div><span className="float-check">✓</span></div>
+          <div className="art-annotation"><span /> FIGMA SPEC DESIGN COMPLIANT</div>
         </div>
 
         <div className="login-visual__footer">
-          <span>© 2026 QTKD ABC Logistics</span>
+          <span>© 2026 ABC Logistics Solution</span>
           <span className="footer-dash" />
-          <span>Được thiết kế cho những hành trình lớn.</span>
+          <span>Thiết kế theo chuẩn Figma Design Pack QTKD.</span>
         </div>
       </section>
 
       <section className="login-panel">
         <div className="login-mobile-brand brand">
-          <span className="brand-mark">Q</span>
-          <span className="brand-name">QTKD<span>LOGISTICS</span></span>
+          <span className="brand-mark">ABC</span>
+          <span className="brand-name">ABC LOGISTICS<span>QTKD 4.0</span></span>
         </div>
         <div className="login-form-wrap">
           <div className="login-heading">
             <span className="eyebrow">CHÀO MỪNG TRỞ LẠI</span>
             <h2>Đăng nhập</h2>
-            <p>Đăng nhập để tiếp tục vào không gian làm việc của bạn.</p>
+            <p>Đăng nhập để vào hệ thống Quản trị kinh doanh ABC Logistics.</p>
           </div>
 
           {(error || initializationError) && (
@@ -118,7 +118,7 @@ export default function LoginPage() {
 
             <div className="password-label">
               <label htmlFor="password">Mật khẩu</label>
-              <button type="button" className="text-button" onClick={() => setError("Nếu bạn quên mật khẩu, vui lòng liên hệ quản trị viên để được hỗ trợ.")}>Quên mật khẩu?</button>
+              <button type="button" className="text-button" onClick={() => setError("Nếu bạn quên mật khẩu, vui lòng liên hệ quản trị viên IT để được cấp lại.")}>Quên mật khẩu?</button>
             </div>
             <div className="input-wrap">
               <Icon name="lock" size={18} />
@@ -143,52 +143,99 @@ export default function LoginPage() {
             </div>
 
             <button type="submit" className="button button--primary login-submit" disabled={isSubmitting}>
-              {isSubmitting ? <><span className="button-spinner" /> Đang xác thực…</> : <>Đăng nhập <Icon name="arrow" size={17} /></>}
+              {isSubmitting ? <><span className="button-spinner" /> Đang xác thực…</> : <>Đăng nhập hệ thống <Icon name="arrow" size={17} /></>}
             </button>
           </form>
 
-          <div style={{ marginTop: "1rem", paddingTop: "0.85rem", borderTop: "1px dashed #cbd5e1", fontSize: "0.82rem" }}>
-            <div style={{ fontWeight: 600, color: "#64748b", marginBottom: "0.4rem" }}>Tài khoản demo (Bấm để điền nhanh):</div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
+          {/* Quick-fill Test User Accounts */}
+          <div style={{ marginTop: "1.25rem", paddingTop: "1rem", borderTop: "1px dashed #e2e8f0", fontSize: "0.82rem" }}>
+            <div style={{ fontWeight: 600, color: "#1e3a8a", marginBottom: "0.5rem" }}>
+              Tài khoản mẫu (Bấm để điền nhanh &amp; đăng nhập):
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.4rem" }}>
               <button
                 type="button"
-                className="button button--ghost"
-                style={{ fontSize: "0.75rem", padding: "0.2rem 0.5rem", borderRadius: "4px", border: "1px solid #cbd5e1" }}
-                onClick={() => { setUsername("admin"); setPassword("Password123!"); setError(""); }}
+                style={{
+                  fontSize: "0.75rem",
+                  padding: "0.4rem 0.6rem",
+                  borderRadius: "6px",
+                  border: "1px solid #bfdbfe",
+                  background: "#eff6ff",
+                  color: "#1e3a8a",
+                  textAlign: "left",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
+                onClick={() => { setUsername("nv_kinhdoanh"); setPassword("Password123!"); setError(""); }}
               >
-                🔑 Admin
+                📋 Chuyên viên KD
               </button>
               <button
                 type="button"
-                className="button button--ghost"
-                style={{ fontSize: "0.75rem", padding: "0.2rem 0.5rem", borderRadius: "4px", border: "1px solid #cbd5e1" }}
-                onClick={() => { setUsername("giamdoc"); setPassword("Password123!"); setError(""); }}
-              >
-                👔 Giám Đốc
-              </button>
-              <button
-                type="button"
-                className="button button--ghost"
-                style={{ fontSize: "0.75rem", padding: "0.2rem 0.5rem", borderRadius: "4px", border: "1px solid #cbd5e1" }}
+                style={{
+                  fontSize: "0.75rem",
+                  padding: "0.4rem 0.6rem",
+                  borderRadius: "6px",
+                  border: "1px solid #bfdbfe",
+                  background: "#eff6ff",
+                  color: "#1e3a8a",
+                  textAlign: "left",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
                 onClick={() => { setUsername("tp_kinhdoanh"); setPassword("Password123!"); setError(""); }}
               >
                 💼 Trưởng phòng KD
               </button>
               <button
                 type="button"
-                className="button button--ghost"
-                style={{ fontSize: "0.75rem", padding: "0.2rem 0.5rem", borderRadius: "4px", border: "1px solid #cbd5e1" }}
-                onClick={() => { setUsername("nv_kinhdoanh"); setPassword("Password123!"); setError(""); }}
+                style={{
+                  fontSize: "0.75rem",
+                  padding: "0.4rem 0.6rem",
+                  borderRadius: "6px",
+                  border: "1px solid #bfdbfe",
+                  background: "#eff6ff",
+                  color: "#1e3a8a",
+                  textAlign: "left",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
+                onClick={() => { setUsername("giamdoc"); setPassword("Password123!"); setError(""); }}
               >
-                📋 Nhân viên KD
+                👔 Ban Giám đốc
+              </button>
+              <button
+                type="button"
+                style={{
+                  fontSize: "0.75rem",
+                  padding: "0.4rem 0.6rem",
+                  borderRadius: "6px",
+                  border: "1px solid #bfdbfe",
+                  background: "#eff6ff",
+                  color: "#1e3a8a",
+                  textAlign: "left",
+                  fontWeight: 600,
+                  cursor: "pointer",
+                }}
+                onClick={() => { setUsername("admin"); setPassword("Password123!"); setError(""); }}
+              >
+                🔑 Quản trị hệ thống
               </button>
             </div>
           </div>
 
-          <div className="login-security"><Icon name="lock" size={15} /><span>Phiên làm việc được duy trì an toàn trên tab này</span></div>
-          <div className="login-help">Cần hỗ trợ? <a href="mailto:support@qtkd.com">Liên hệ bộ phận quản trị</a></div>
+          <div className="login-security">
+            <Icon name="lock" size={15} />
+            <span>Kết nối bảo mật chuẩn SSL &amp; JWT Bearer Authentication</span>
+          </div>
+          <div className="login-help">
+            Cần hỗ trợ kỹ thuật? <a href="mailto:support@abclogistics.vn">support@abclogistics.vn</a>
+          </div>
         </div>
-        <div className="login-panel__footer"><span>QTKD LOGISTICS</span><span>ĐIỀU KHOẢN &nbsp;·&nbsp; QUYỀN RIÊNG TƯ</span></div>
+        <div className="login-panel__footer">
+          <span>ABC LOGISTICS SOLUTION</span>
+          <span>BẢO MẬT &nbsp;·&nbsp; QUYỀN RIÊNG TƯ &nbsp;·&nbsp; SPRINT 01</span>
+        </div>
       </section>
     </main>
   );

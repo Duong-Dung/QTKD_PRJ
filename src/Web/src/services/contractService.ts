@@ -51,6 +51,7 @@ export interface CreateContractPayload {
 
 export interface GetContractsFilter {
   keyword?: string;
+  searchTerm?: string;
   status?: string;
   customerId?: string;
   pageIndex?: number;
@@ -119,7 +120,8 @@ export function mapAttachmentResponseToAttachment(res: AttachmentResponse): Atta
 export const contractService = {
   async getContracts(filter: GetContractsFilter = {}): Promise<PagedResult<Contract>> {
     const params = new URLSearchParams();
-    if (filter.keyword?.trim()) params.set('keyword', filter.keyword.trim());
+    const searchVal = filter.keyword?.trim() || filter.searchTerm?.trim();
+    if (searchVal) params.set('keyword', searchVal);
     if (filter.status && filter.status !== 'all') params.set('status', filter.status);
     if (filter.customerId) params.set('customerId', filter.customerId);
     params.set('pageIndex', String(filter.pageIndex ?? 1));
