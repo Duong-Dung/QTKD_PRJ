@@ -24,7 +24,7 @@ const menu: MenuItem[] = [
     section: "Kinh doanh",
     icon: "users",
     description: "Tra cứu hồ sơ khách hàng doanh nghiệp.",
-    permissions: ["customers.view"],
+    permissions: ["customers.view", "customer.read", "customer.manage"],
   },
   {
     id: "contracts",
@@ -32,7 +32,7 @@ const menu: MenuItem[] = [
     section: "Kinh doanh",
     icon: "file",
     description: "Không gian quản lý hợp đồng và phụ lục.",
-    permissions: ["contracts.view"],
+    permissions: ["contracts.view", "contract.read", "contract.create"],
   },
   {
     id: "pricing",
@@ -85,6 +85,10 @@ const menu: MenuItem[] = [
 ];
 
 export function getVisibleMenu(user: UserDto) {
+  if (user.roles.includes("ADMIN")) {
+    return menu;
+  }
+
   return menu.filter((item) => {
     const hasRole =
       !item.roles || item.roles.some((role) => user.roles.includes(role));

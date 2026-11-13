@@ -15,6 +15,8 @@ export interface Attachment {
   sizeBytes: number;
   isMainDocument: boolean;
   uploadedAt: string;
+  rawFile?: File;
+  checksum?: string;
 }
 
 export interface Contract {

@@ -8,6 +8,8 @@ interface ContractListProps {
   onOpenDetail: (contract: Contract) => void;
   toastMessage?: { title: string; desc: string } | null;
   onCloseToast?: () => void;
+  isLoading?: boolean;
+  onRefresh?: () => void;
 }
 
 export const ContractList: React.FC<ContractListProps> = ({
@@ -16,6 +18,8 @@ export const ContractList: React.FC<ContractListProps> = ({
   onOpenDetail,
   toastMessage,
   onCloseToast,
+  isLoading,
+  onRefresh,
 }) => {
   const [activeTab, setActiveTab] = useState<'all' | 'Draft' | 'PendingApproval' | 'Approved'>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -116,13 +120,26 @@ export const ContractList: React.FC<ContractListProps> = ({
           </p>
         </div>
 
-        <button
-          onClick={onOpenCreate}
-          className="inline-flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2.5 rounded-lg shadow-sm shadow-blue-500/20 transition-all hover:shadow"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Tạo hợp đồng</span>
-        </button>
+        <div className="flex items-center gap-3">
+          {onRefresh && (
+            <button
+              type="button"
+              onClick={onRefresh}
+              disabled={isLoading}
+              className="inline-flex items-center px-3 py-2 text-xs font-semibold text-slate-600 bg-white hover:bg-slate-50 border border-slate-200 rounded-lg shadow-sm transition-all"
+              title="Làm mới dữ liệu từ Database"
+            >
+              {isLoading ? 'Đang tải...' : 'Làm mới'}
+            </button>
+          )}
+          <button
+            onClick={onOpenCreate}
+            className="inline-flex items-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white font-medium px-4 py-2.5 rounded-lg shadow-sm shadow-blue-500/20 transition-all hover:shadow"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Tạo hợp đồng</span>
+          </button>
+        </div>
       </div>
 
       {/* 4 KPI Summary Cards */}

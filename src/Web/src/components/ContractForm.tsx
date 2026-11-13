@@ -49,9 +49,16 @@ export const ContractForm: React.FC<ContractFormProps> = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Kiểm tra khách hàng có đang hoạt động (hỗ trợ cả 'Active', 1, và statusName)
+  const isCustomerActive = (c?: Customer | null) => {
+    if (!c) return false;
+    const s = String(c.status || (c as any).statusName || '').toLowerCase();
+    return s === 'active' || (c.status as any) === 1;
+  };
+
   // Danh sách khách hàng chỉ lấy những khách hàng Active
   const activeCustomers = useMemo(() => {
-    return customers.filter((c) => c.status === 'Active');
+    return customers.filter(isCustomerActive);
   }, [customers]);
 
   const filteredCustomers = useMemo(() => {
@@ -67,7 +74,7 @@ export const ContractForm: React.FC<ContractFormProps> = ({
   }, [customers, selectedCustomerId]);
 
   // Kiểm tra điều kiện gửi duyệt
-  const hasActiveCustomer = Boolean(selectedCustomer && selectedCustomer.status === 'Active');
+  const hasActiveCustomer = Boolean(selectedCustomer && isCustomerActive(selectedCustomer));
   const hasValidDates = Boolean(
     effectiveFrom && effectiveTo && new Date(effectiveFrom) <= new Date(effectiveTo)
   );
@@ -84,6 +91,7 @@ export const ContractForm: React.FC<ContractFormProps> = ({
       sizeBytes: file.size,
       isMainDocument: attachments.length === 0 && idx === 0, // Tự động đánh dấu file đầu tiên là chính nếu chưa có
       uploadedAt: new Date().toISOString().replace('T', ' ').substring(0, 16),
+      rawFile: file,
     }));
 
     setAttachments((prev) => [...prev, ...newFiles]);
